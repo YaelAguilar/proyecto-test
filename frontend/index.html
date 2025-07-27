@@ -12,6 +12,7 @@
         <nav>
             <button id="nav-catalog" class="nav-button active">Catálogo</button>
             <button id="nav-auth" class="nav-button">Iniciar Sesión / Registrar</button>
+            <button id="nav-admin-dashboard" class="nav-button hidden">Panel Admin</button>
             <button id="nav-provider-dashboard" class="nav-button hidden">Panel Proveedor</button>
             <button id="nav-client-dashboard" class="nav-button hidden">Panel Cliente</button>
             <button id="nav-logout" class="nav-button hidden">Cerrar Sesión</button>
@@ -25,6 +26,29 @@
         <!-- Catálogo de Equipos -->
         <section id="catalog-page" class="page">
             <h2>Catálogo de Equipos</h2>
+            
+            <!-- NUEVO: Filtros de búsqueda -->
+            <div id="search-filters" class="filters-container">
+                <h3>Filtros de búsqueda</h3>
+                <div class="filter-row">
+                    <input type="text" id="filter-name" placeholder="Buscar por nombre...">
+                    <select id="filter-type">
+                        <option value="">Todos los tipos</option>
+                    </select>
+                    <select id="filter-state">
+                        <option value="">Todos los estados</option>
+                    </select>
+                    <select id="filter-company">
+                        <option value="">Todas las empresas</option>
+                    </select>
+                    <select id="filter-brand">
+                        <option value="">Todas las marcas</option>
+                    </select>
+                    <button id="apply-filters-btn" class="btn">Buscar</button>
+                    <button id="clear-filters-btn" class="btn">Limpiar</button>
+                </div>
+            </div>
+            
             <div id="equipment-list" class="grid-container">
                 <!-- Los equipos se cargarán aquí -->
             </div>
@@ -72,18 +96,37 @@
                             <option value="cliente">Cliente</option>
                             <option value="proveedor">Proveedor</option>
                         </select>
-                        <!-- Campos para proveedor (condicionales) -->
+                        <!-- MODIFICADO: Campos para proveedor - ahora solo selecciona empresa -->
                         <div id="provider-fields" class="hidden">
-                            <h4>Datos de la Compañía (Opcional)</h4>
-                            <input type="text" id="company-name" placeholder="Nombre de la Compañía">
-                            <input type="email" id="company-email" placeholder="Email de la Compañía">
-                            <input type="text" id="company-phone" placeholder="Teléfono de la Compañía">
-                            <input type="text" id="company-address" placeholder="Dirección de la Compañía">
-                            <input type="text" id="company-website" placeholder="Sitio Web de la Compañía">
+                            <h4>Selecciona tu Empresa</h4>
+                            <select id="provider-company-id" required>
+                                <option value="">Selecciona una empresa</option>
+                            </select>
                         </div>
                         <button type="submit" class="btn">Registrar</button>
                     </form>
                 </div>
+            </div>
+        </section>
+
+        <!-- NUEVO: Panel de Administrador -->
+        <section id="admin-dashboard-page" class="page hidden">
+            <h2>Panel de Administrador</h2>
+            <div class="dashboard-tabs">
+                <button class="tab-button active" data-tab="admin-companies">Empresas</button>
+                <button class="tab-button" data-tab="admin-brands">Marcas</button>
+            </div>
+
+            <div id="admin-companies-tab" class="tab-content">
+                <h3>Gestión de Empresas</h3>
+                <button id="add-company-btn" class="btn">Añadir Nueva Empresa</button>
+                <div id="companies-list" class="list-container"></div>
+            </div>
+
+            <div id="admin-brands-tab" class="tab-content hidden">
+                <h3>Gestión de Marcas</h3>
+                <button id="add-brand-btn" class="btn">Añadir Nueva Marca</button>
+                <div id="brands-list" class="list-container"></div>
             </div>
         </section>
 
@@ -92,7 +135,7 @@
             <h2>Panel de Proveedor</h2>
             <div class="dashboard-tabs">
                 <button class="tab-button active" data-tab="provider-equipment">Mis Equipos</button>
-                <button class="tab-button" data-tab="provider-company">Mi Compañía</button>
+                <button class="tab-button" data-tab="provider-company">Mi Empresa</button>
             </div>
 
             <div id="provider-equipment-tab" class="tab-content">
@@ -102,28 +145,16 @@
             </div>
 
             <div id="provider-company-tab" class="tab-content hidden">
-                <h3>Información de mi Compañía</h3>
+                <h3>Información de mi Empresa</h3>
                 <div id="company-details-view">
-                    <!-- Detalles de la compañía se mostrarán aquí -->
                     <p><strong>Nombre:</strong> <span id="view-company-name"></span></p>
                     <p><strong>Email:</strong> <span id="view-company-email"></span></p>
                     <p><strong>Teléfono:</strong> <span id="view-company-phone"></span></p>
                     <p><strong>Dirección:</strong> <span id="view-company-address"></span></p>
                     <p><strong>Web:</strong> <span id="view-company-website"></span></p>
-                    <button id="edit-company-btn" class="btn">Editar Compañía</button>
                     <h4>Marcas asociadas</h4>
                     <div id="company-brands-list"></div>
-                    <button id="add-company-brand-btn" class="btn">Asociar Marca</button>
                 </div>
-                <form id="edit-company-form" class="hidden">
-                    <input type="text" id="edit-company-name" placeholder="Nombre de la Compañía" required>
-                    <input type="email" id="edit-company-email" placeholder="Email de la Compañía">
-                    <input type="text" id="edit-company-phone" placeholder="Teléfono de la Compañía">
-                    <input type="text" id="edit-company-address" placeholder="Dirección de la Compañía">
-                    <input type="text" id="edit-company-website" placeholder="Sitio Web de la Compañía">
-                    <button type="submit" class="btn">Guardar Cambios</button>
-                    <button type="button" class="btn cancel-btn" id="cancel-edit-company-btn">Cancelar</button>
-                </form>
             </div>
         </section>
 
@@ -145,7 +176,44 @@
         </section>
     </main>
 
-    <!-- Modals (pop-ups) para añadir/editar equipo, marca, tipo, estado, asociar marca -->
+    <!-- Modals (pop-ups) -->
+
+    <!-- Modal para Añadir/Editar Empresa (NUEVO) -->
+    <div id="company-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h3 id="company-modal-title">Añadir Empresa</h3>
+            <form id="company-form">
+                <input type="hidden" id="company-id">
+                <input type="text" id="company-name" placeholder="Nombre de la Empresa" required>
+                <input type="email" id="company-email" placeholder="Email de la Empresa">
+                <input type="text" id="company-phone" placeholder="Teléfono">
+                <input type="text" id="company-address" placeholder="Dirección">
+                <input type="url" id="company-website" placeholder="Sitio Web">
+                <button type="submit" class="btn">Guardar Empresa</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Gestionar Marcas de Empresa (NUEVO) -->
+    <div id="manage-company-brands-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h3>Gestionar Marcas de <span id="manage-brands-company-name"></span></h3>
+            <input type="hidden" id="manage-brands-company-id">
+            
+            <h4>Marcas Asociadas</h4>
+            <div id="manage-brands-list" class="list-container"></div>
+            
+            <h4>Asociar Nueva Marca</h4>
+            <form id="associate-brand-form">
+                <select id="select-brand-to-associate" required>
+                    <option value="">Selecciona una marca</option>
+                </select>
+                <button type="submit" class="btn">Asociar Marca</button>
+            </form>
+        </div>
+    </div>
 
     <!-- Modal para Añadir/Editar Equipo -->
     <div id="equipment-modal" class="modal hidden">
@@ -157,7 +225,6 @@
                 <input type="text" id="equipment-name" placeholder="Nombre del Equipo" required>
                 <textarea id="equipment-description" placeholder="Descripción"></textarea>
                 <input type="number" id="equipment-price" step="0.01" placeholder="Precio" required>
-                <!-- CORREGIDO: input type="url" para la URL de la imagen del equipo -->
                 <input type="url" id="equipment-url-image" placeholder="URL de la Imagen del Equipo"> 
                 <select id="equipment-type-id" required>
                     <option value="">Selecciona Tipo de Equipo</option>
@@ -182,44 +249,6 @@
                 <input type="hidden" id="brand-id">
                 <input type="text" id="brand-name" placeholder="Nombre de la Marca" required>
                 <button type="submit" class="btn">Guardar Marca</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modales para Tipo y Estado (ahora solo de lectura, pero se mantienen porque las usa equipment-form) -->
-    <div id="type-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-button">×</span>
-            <h3 id="type-modal-title">Detalles de Tipo de Equipo</h3>
-            <form id="type-form">
-                <input type="hidden" id="type-id">
-                <input type="text" id="type-name" placeholder="Nombre del Tipo" disabled>
-            </form>
-        </div>
-    </div>
-
-    <div id="state-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-button">×</span>
-            <h3 id="state-modal-title">Detalles de Estado de Equipo</h3>
-            <form id="state-form">
-                <input type="hidden" id="state-id">
-                <input type="text" id="state-name" placeholder="Nombre del Estado" disabled>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Asociar Marca a Compañía -->
-    <div id="company-brand-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-button">×</span>
-            <h3>Asociar Marca a Compañía</h3>
-            <form id="company-brand-form">
-                <select id="associate-brand-id" required>
-                    <option value="">Selecciona Marca</option>
-                    <!-- Opciones de marcas se cargarán aquí -->
-                </select>
-                <button type="submit" class="btn">Asociar Marca</button>
             </form>
         </div>
     </div>
