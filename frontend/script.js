@@ -1,9 +1,9 @@
 // --- Configuración Global ---
-const API_BASE_URL = 'http://localhost:7000/api'; // Asegúrate de que coincida con el puerto de tu Javalin
+const API_BASE_URL = 'http://localhost:7000/api';
 let CURRENT_USER = null;
 let USER_TOKEN = null;
 let USER_ROLE = null;
-let USER_COMPANY_ID = null; // Para proveedores
+let USER_COMPANY_ID = null;
 
 // --- Referencias a Elementos del DOM ---
 const pages = document.querySelectorAll('.page');
@@ -13,7 +13,8 @@ const errorMessageDiv = document.getElementById('error-message');
 
 // Navigation Buttons
 const navCatalogBtn = document.getElementById('nav-catalog');
-const navLoginBtn = document.getElementById('nav-auth'); // CORREGIDO: Usar el ID correcto del botón
+const navLoginBtn = document.getElementById('nav-auth');
+const navAdminDashboardBtn = document.getElementById('nav-admin-dashboard');
 const navProviderDashboardBtn = document.getElementById('nav-provider-dashboard');
 const navClientDashboardBtn = document.getElementById('nav-client-dashboard');
 const navLogoutBtn = document.getElementById('nav-logout');
@@ -23,9 +24,17 @@ const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
 const registerUserTypeSelect = document.getElementById('register-usertype');
 const providerFieldsDiv = document.getElementById('provider-fields');
+const providerCompanySelect = document.getElementById('provider-company-id');
 
 // Catalog Page Elements
 const equipmentListDiv = document.getElementById('equipment-list');
+const filterNameInput = document.getElementById('filter-name');
+const filterTypeSelect = document.getElementById('filter-type');
+const filterStateSelect = document.getElementById('filter-state');
+const filterCompanySelect = document.getElementById('filter-company');
+const filterBrandSelect = document.getElementById('filter-brand');
+const applyFiltersBtn = document.getElementById('apply-filters-btn');
+const clearFiltersBtn = document.getElementById('clear-filters-btn');
 
 // Equipment Detail Page Elements
 const backToCatalogBtn = document.getElementById('back-to-catalog');
@@ -37,6 +46,15 @@ const reviewStarValueInput = document.getElementById('review-star-value');
 const reviewBodyInput = document.getElementById('review-body');
 const submitReviewBtn = document.getElementById('submit-review-btn');
 
+// Admin Dashboard Elements
+const adminTabs = document.querySelectorAll('#admin-dashboard-page .tab-button');
+const adminCompaniesTab = document.getElementById('admin-companies-tab');
+const adminBrandsTab = document.getElementById('admin-brands-tab');
+const addCompanyBtn = document.getElementById('add-company-btn');
+const companiesListDiv = document.getElementById('companies-list');
+const addBrandBtn = document.getElementById('add-brand-btn');
+const brandsListDiv = document.getElementById('brands-list');
+
 // Provider Dashboard Elements
 const providerTabs = document.querySelectorAll('#provider-dashboard-page .tab-button');
 const providerEquipmentTab = document.getElementById('provider-equipment-tab');
@@ -44,11 +62,12 @@ const providerCompanyTab = document.getElementById('provider-company-tab');
 const addEquipmentBtn = document.getElementById('add-equipment-btn');
 const myEquipmentListDiv = document.getElementById('my-equipment-list');
 const companyDetailsView = document.getElementById('company-details-view');
-const editCompanyBtn = document.getElementById('edit-company-btn');
-const editCompanyForm = document.getElementById('edit-company-form');
-const cancelEditCompanyBtn = document.getElementById('cancel-edit-company-btn');
+const viewCompanyName = document.getElementById('view-company-name');
+const viewCompanyEmail = document.getElementById('view-company-email');
+const viewCompanyPhone = document.getElementById('view-company-phone');
+const viewCompanyAddress = document.getElementById('view-company-address');
+const viewCompanyWebsite = document.getElementById('view-company-website');
 const companyBrandsListDiv = document.getElementById('company-brands-list');
-const addCompanyBrandBtn = document.getElementById('add-company-brand-btn');
 
 // Client Dashboard Elements
 const clientTabs = document.querySelectorAll('#client-dashboard-page .tab-button');
@@ -58,30 +77,40 @@ const myFavoritesListDiv = document.getElementById('my-favorites-list');
 const myReviewsListDiv = document.getElementById('my-reviews-list');
 
 // Modals
+const companyModal = document.getElementById('company-modal');
+const companyModalTitle = document.getElementById('company-modal-title');
+const companyForm = document.getElementById('company-form');
+const companyIdInput = document.getElementById('company-id');
+const companyNameInput = document.getElementById('company-name');
+const companyEmailInput = document.getElementById('company-email');
+const companyPhoneInput = document.getElementById('company-phone');
+const companyAddressInput = document.getElementById('company-address');
+const companyWebsiteInput = document.getElementById('company-website');
+
+const manageCompanyBrandsModal = document.getElementById('manage-company-brands-modal');
+const manageBrandsCompanyName = document.getElementById('manage-brands-company-name');
+const manageBrandsCompanyId = document.getElementById('manage-brands-company-id');
+const manageBrandsListDiv = document.getElementById('manage-brands-list');
+const associateBrandForm = document.getElementById('associate-brand-form');
+const selectBrandToAssociate = document.getElementById('select-brand-to-associate');
+
 const equipmentModal = document.getElementById('equipment-modal');
 const equipmentModalTitle = document.getElementById('equipment-modal-title');
 const equipmentForm = document.getElementById('equipment-form');
+const equipmentIdInput = document.getElementById('equipment-id');
+const equipmentNameInput = document.getElementById('equipment-name');
+const equipmentDescriptionInput = document.getElementById('equipment-description');
+const equipmentPriceInput = document.getElementById('equipment-price');
+const equipmentUrlImageInput = document.getElementById('equipment-url-image');
 const equipmentTypeIdSelect = document.getElementById('equipment-type-id');
 const equipmentStateIdSelect = document.getElementById('equipment-state-id');
 const equipmentBrandIdSelect = document.getElementById('equipment-brand-id');
-// CORREGIDO: Referencia al input de la URL de la imagen del equipo
-const equipmentUrlImageInput = document.getElementById('equipment-url-image'); 
 
 const brandModal = document.getElementById('brand-modal');
 const brandModalTitle = document.getElementById('brand-modal-title');
 const brandForm = document.getElementById('brand-form');
-
-const typeModal = document.getElementById('type-modal');
-const typeModalTitle = document.getElementById('type-modal-title');
-const typeForm = document.getElementById('type-form');
-
-const stateModal = document.getElementById('state-modal');
-const stateModalTitle = document.getElementById('state-modal-title');
-const stateForm = document.getElementById('state-form');
-
-const companyBrandModal = document.getElementById('company-brand-modal');
-const companyBrandForm = document.getElementById('company-brand-form');
-const associateBrandIdSelect = document.getElementById('associate-brand-id');
+const brandIdInput = document.getElementById('brand-id');
+const brandNameInput = document.getElementById('brand-name');
 
 // Global close button for modals
 document.querySelectorAll('.modal .close-button').forEach(button => {
@@ -95,7 +124,7 @@ document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.classList.add('hidden');
-        }
+    }
     });
 });
 
@@ -114,41 +143,34 @@ function showError(message) {
     errorMessageDiv.classList.remove('hidden');
     setTimeout(() => {
         errorMessageDiv.classList.add('hidden');
-    }, 5000); // Hide after 5 seconds
+    }, 5000);
 }
 
 function showPage(pageId) {
     pages.forEach(page => page.classList.add('hidden'));
-
     const targetPage = document.getElementById(pageId);
     if (targetPage) {
         targetPage.classList.remove('hidden');
-    } else {
-        console.error(`Error de UI: No se encontró el elemento con ID "${pageId}". Por favor, verifica tu index.html.`);
-        showError(`Error al cargar la sección de la página. (ID: ${pageId})`);
-        return;
     }
-
     navButtons.forEach(btn => btn.classList.remove('active'));
-    // CORREGIDO: Asegurarse de que 'nav-auth' sea el ID correcto para la página de autenticación
-    const navBtnId = `nav-${pageId.replace('-page', '') === 'auth' ? 'auth' : pageId.replace('-page', '')}`; // 'auth-page' -> 'nav-auth'
+    const navBtnId = `nav-${pageId.replace('-page', '')}`;
     const navBtnToActivate = document.getElementById(navBtnId);
     if (navBtnToActivate) {
         navBtnToActivate.classList.add('active');
-    } else {
-        console.warn(`Advertencia de UI: No se encontró el botón de navegación para la página "${pageId}". ID esperado: ${navBtnId}`);
     }
 }
 
 function updateNavButtons() {
     const isLoggedIn = CURRENT_USER !== null;
-    const isClient = USER_ROLE === 'cliente';
-    const isProvider = USER_ROLE === 'proveedor';
+    const isClient = USER_ROLE && USER_ROLE.toLowerCase() === 'cliente';
+    const isProvider = USER_ROLE && USER_ROLE.toLowerCase() === 'proveedor';
+    const isAdmin = USER_ROLE && USER_ROLE.toLowerCase() === 'administrador';
 
-    navLoginBtn.classList.toggle('hidden', isLoggedIn); // Ahora navLoginBtn es nav-auth
+    navLoginBtn.classList.toggle('hidden', isLoggedIn);
     navLogoutBtn.classList.toggle('hidden', !isLoggedIn);
     navClientDashboardBtn.classList.toggle('hidden', !isLoggedIn || !isClient);
     navProviderDashboardBtn.classList.toggle('hidden', !isLoggedIn || !isProvider);
+    navAdminDashboardBtn.classList.toggle('hidden', !isLoggedIn || !isAdmin);
 }
 
 function isAuthenticated() {
@@ -156,16 +178,20 @@ function isAuthenticated() {
 }
 
 function isClient() {
-    return isAuthenticated() && USER_ROLE === 'cliente';
+    return isAuthenticated() && USER_ROLE && USER_ROLE.toLowerCase() === 'cliente';
 }
 
 function isProvider() {
-    return isAuthenticated() && USER_ROLE === 'proveedor';
+    return isAuthenticated() && USER_ROLE && USER_ROLE.toLowerCase() === 'proveedor';
+}
+
+function isAdmin() {
+    return isAuthenticated() && USER_ROLE && USER_ROLE.toLowerCase() === 'administrador';
 }
 
 async function fetchApi(endpoint, method = 'GET', body = null, requiresAuth = false) {
     showLoader();
-    errorMessageDiv.classList.add('hidden'); // Hide previous errors
+    errorMessageDiv.classList.add('hidden');
 
     const headers = {
         'Content-Type': 'application/json',
@@ -199,7 +225,7 @@ async function fetchApi(endpoint, method = 'GET', body = null, requiresAuth = fa
     } catch (error) {
         console.error('API Error:', error);
         showError(error.message);
-        throw error; // Re-throw to be caught by specific handler
+        throw error;
     } finally {
         hideLoader();
     }
@@ -220,7 +246,7 @@ async function handleLogin(event) {
         if (data.companyId) {
             localStorage.setItem('userCompanyId', data.companyId);
         } else {
-             localStorage.removeItem('userCompanyId'); // Clear if not provider or no company
+            localStorage.removeItem('userCompanyId');
         }
 
         CURRENT_USER = data.userId;
@@ -231,8 +257,18 @@ async function handleLogin(event) {
         alert('Inicio de sesión exitoso!');
         loginForm.reset();
         updateAuthUI();
-        showPage('catalog-page');
-        loadCatalog();
+        
+        // Redirigir según el rol
+        if (USER_ROLE === 'administrador') {
+            showPage('admin-dashboard-page');
+            loadAdminDashboard();
+        } else if (USER_ROLE === 'proveedor') {
+            showPage('provider-dashboard-page');
+            loadProviderDashboard();
+        } else if (USER_ROLE === 'cliente') {
+            showPage('catalog-page');
+            loadCatalog();
+        }
     } catch (error) {
         // Error already displayed by fetchApi
     }
@@ -248,11 +284,12 @@ async function handleRegister(event) {
     const registerData = { fullName, email, password, userType };
 
     if (userType === 'proveedor') {
-        registerData.companyName = document.getElementById('company-name').value;
-        registerData.companyEmail = document.getElementById('company-email').value;
-        registerData.companyPhone = document.getElementById('company-phone').value;
-        registerData.companyAddress = document.getElementById('company-address').value;
-        registerData.companyWebSite = document.getElementById('company-website').value;
+        const companyId = providerCompanySelect.value;
+        if (!companyId) {
+            showError('Por favor selecciona una empresa');
+            return;
+        }
+        registerData.companyId = parseInt(companyId);
     }
 
     try {
@@ -262,8 +299,6 @@ async function handleRegister(event) {
         localStorage.setItem('userRole', data.userRole);
         if (data.companyId) {
             localStorage.setItem('userCompanyId', data.companyId);
-        } else {
-            localStorage.removeItem('userCompanyId'); // Clear if not provider or no company
         }
 
         CURRENT_USER = data.userId;
@@ -273,12 +308,11 @@ async function handleRegister(event) {
 
         alert('Registro exitoso!');
         registerForm.reset();
-        providerFieldsDiv.classList.add('hidden'); // Hide provider fields
+        providerFieldsDiv.classList.add('hidden');
         updateAuthUI();
         showPage('catalog-page');
         loadCatalog();
-    }
-    catch (error) {
+    } catch (error) {
         // Error already displayed by fetchApi
     }
 }
@@ -297,18 +331,16 @@ function handleLogout() {
     alert('Sesión cerrada.');
     updateAuthUI();
     showPage('catalog-page');
-    loadCatalog(); // Refresh catalog
+    loadCatalog();
 }
 
 function updateAuthUI() {
     updateNavButtons();
-    // Reset forms and hide/show relevant sections
     loginForm.reset();
     registerForm.reset();
     registerUserTypeSelect.value = '';
     providerFieldsDiv.classList.add('hidden');
 
-    // Hide/show review form based on client role
     if (isClient()) {
         reviewFormContainer.classList.remove('hidden');
         reviewLoginPrompt.classList.add('hidden');
@@ -324,15 +356,69 @@ async function loadCatalog() {
     try {
         const equipment = await fetchApi('/equipment');
         renderEquipmentList(equipment, equipmentListDiv, 'catalog');
+        await loadFilterOptions();
     } catch (error) {
-        // Error already displayed
+        equipmentListDiv.innerHTML = '<p>Error al cargar el catálogo.</p>';
     }
 }
 
+async function loadFilterOptions() {
+    try {
+        // Cargar tipos
+        const types = await fetchApi('/types-equipment');
+        populateSelect(filterTypeSelect, types, 'id', 'type', 'Todos los tipos');
+        
+        // Cargar estados
+        const states = await fetchApi('/states-equipment');
+        populateSelect(filterStateSelect, states, 'id', 'state', 'Todos los estados');
+        
+        // Cargar empresas
+        const companies = await fetchApi('/companies');
+        populateSelect(filterCompanySelect, companies, 'id', 'name', 'Todas las empresas');
+        
+        // Cargar marcas
+        const brands = await fetchApi('/brands');
+        populateSelect(filterBrandSelect, brands, 'id', 'nameBrand', 'Todas las marcas');
+    } catch (error) {
+        console.error('Error cargando opciones de filtro:', error);
+    }
+}
+
+async function applyFilters() {
+    const name = filterNameInput.value;
+    const typeId = filterTypeSelect.value;
+    const stateId = filterStateSelect.value;
+    const companyId = filterCompanySelect.value;
+    const brandId = filterBrandSelect.value;
+
+    const params = new URLSearchParams();
+    if (name) params.append('name', name);
+    if (typeId) params.append('typeId', typeId);
+    if (stateId) params.append('stateId', stateId);
+    if (companyId) params.append('companyId', companyId);
+    if (brandId) params.append('brandId', brandId);
+
+    try {
+        const equipment = await fetchApi(`/equipment/search?${params.toString()}`);
+        renderEquipmentList(equipment, equipmentListDiv, 'catalog');
+    } catch (error) {
+        showError('Error al buscar equipos');
+    }
+}
+
+function clearFilters() {
+    filterNameInput.value = '';
+    filterTypeSelect.value = '';
+    filterStateSelect.value = '';
+    filterCompanySelect.value = '';
+    filterBrandSelect.value = '';
+    loadCatalog();
+}
+
 function renderEquipmentList(equipmentList, container, context = 'catalog') {
-    container.innerHTML = ''; // Clear previous content
+    container.innerHTML = '';
     if (equipmentList.length === 0) {
-        container.innerHTML = '<p>No hay equipos disponibles en este momento.</p>';
+        container.innerHTML = '<p>No hay equipos disponibles.</p>';
         return;
     }
 
@@ -346,7 +432,9 @@ function renderEquipmentList(equipmentList, container, context = 'catalog') {
             <p><strong>Tipo:</strong> ${equipment.typeName}</p>
             <p><strong>Estado:</strong> ${equipment.stateName}</p>
             <p><strong>Precio:</strong> $${equipment.price.toFixed(2)}</p>
-            ${context === 'catalog' ? '<button class="btn view-detail-btn" data-id="' + equipment.id + '">Ver Detalles</button>' : ''}
+            <p><strong>Empresa:</strong> ${equipment.companyName}</p>
+            ${context === 'catalog' || context === 'provider-dashboard' ? 
+                '<button class="btn view-detail-btn" data-id="' + equipment.id + '">Ver Detalles</button>' : ''}
             <div class="card-buttons">
                 ${context === 'provider-dashboard' ? `
                     <button class="btn edit-btn" data-id="${equipment.id}">Editar</button>
@@ -358,14 +446,12 @@ function renderEquipmentList(equipmentList, container, context = 'catalog') {
             </div>
         `;
 
-        // Add event listener for "Ver Detalles" button
-        if (context === 'catalog') {
+        if (context === 'catalog' || context === 'provider-dashboard') {
             card.querySelector('.view-detail-btn').addEventListener('click', (e) => {
                 const equipmentId = e.target.dataset.id;
                 loadEquipmentDetail(equipmentId);
             });
         }
-        // Add event listeners for provider/client dashboard buttons
         if (context === 'provider-dashboard') {
             card.querySelector('.edit-btn').addEventListener('click', (e) => {
                 openEquipmentModalForEdit(e.target.dataset.id);
@@ -393,7 +479,7 @@ async function loadEquipmentDetail(equipmentId) {
         loadReviewsForEquipment(equipmentId);
         showPage('equipment-detail-page');
     } catch (error) {
-        showPage('catalog-page'); // Go back to catalog if error
+        showPage('catalog-page');
     }
 }
 
@@ -407,24 +493,23 @@ function renderEquipmentDetail(equipment) {
             <p><strong>Marca:</strong> ${equipment.brandName}</p>
             <p><strong>Tipo:</strong> ${equipment.typeName}</p>
             <p><strong>Estado:</strong> ${equipment.stateName}</p>
-            <p><strong>Proveedor:</strong> ${equipment.providerName} (${equipment.companyName || 'N/A'})</p>
+            <p><strong>Proveedor:</strong> ${equipment.providerName}</p>
+            <p><strong>Empresa:</strong> ${equipment.companyName || 'N/A'}</p>
             <p>Publicado el: ${new Date(equipment.createdAt).toLocaleDateString()}</p>
             ${isClient() ? `<button id="add-to-favorites-btn" class="btn" data-id="${equipment.id}">Añadir a Favoritos</button>` : ''}
         </div>
     `;
 
-    // Add event listener for Add to Favorites button
     if (isClient()) {
         document.getElementById('add-to-favorites-btn').addEventListener('click', (e) => {
             addToFavorites(e.target.dataset.id);
         });
     }
 
-    // Prepare review form
     reviewStarValueInput.value = '';
     reviewBodyInput.value = '';
     submitReviewBtn.dataset.equipmentId = equipment.id;
-    updateAuthUI(); // Ensure review form visibility is correct based on role
+    updateAuthUI();
 }
 
 // --- Review Functions ---
@@ -440,7 +525,7 @@ async function loadReviewsForEquipment(equipmentId) {
 
 async function submitReview(event) {
     event.preventDefault();
-    const equipmentId = submitReviewBtn.dataset.equipmentId;
+    const equipmentId = parseInt(submitReviewBtn.dataset.equipmentId);
     const starValue = parseInt(reviewStarValueInput.value);
     const body = reviewBodyInput.value;
 
@@ -454,8 +539,8 @@ async function submitReview(event) {
         alert('Reseña enviada con éxito!');
         reviewStarValueInput.value = '';
         reviewBodyInput.value = '';
-        loadReviewsForEquipment(equipmentId); // Reload reviews
-        if (USER_ROLE === 'cliente') loadMyReviews(); // Refresh client dashboard reviews
+        loadReviewsForEquipment(equipmentId);
+        if (isClient()) loadMyReviews();
     } catch (error) {
         // Error already displayed
     }
@@ -475,6 +560,7 @@ function renderReviewsList(reviews, container, context = 'equipment') {
             <div>
                 <p class="review-meta"><strong>${review.userName}</strong> - ${review.starValue} estrellas (${new Date(review.createdAt).toLocaleDateString()})</p>
                 <p class="review-body">${review.body || 'Sin comentario.'}</p>
+                ${context === 'client-dashboard' ? `<p><strong>Equipo:</strong> ${review.equipmentName}</p>` : ''}
             </div>
             ${context === 'client-dashboard' ? `
                 <button class="btn delete-btn" data-id="${review.id}">Eliminar</button>
@@ -504,10 +590,9 @@ async function deleteReview(reviewId) {
     try {
         await fetchApi(`/reviews/${reviewId}`, 'DELETE', null, true);
         alert('Reseña eliminada con éxito!');
-        // Refresh appropriate lists
-        const currentEquipmentId = submitReviewBtn.dataset.equipmentId; // If on detail page
+        const currentEquipmentId = submitReviewBtn.dataset.equipmentId;
         if (currentEquipmentId) loadReviewsForEquipment(currentEquipmentId);
-        loadMyReviews(); // Always refresh own reviews
+        loadMyReviews();
     } catch (error) {
         // Error already displayed
     }
@@ -521,21 +606,21 @@ async function addToFavorites(equipmentId) {
         return;
     }
     try {
-        await fetchApi('/favorites', 'POST', { equipmentId }, true);
+        await fetchApi('/favorites', 'POST', { equipmentId: parseInt(equipmentId) }, true);
         alert('Equipo añadido a favoritos!');
-        if (USER_ROLE === 'cliente') loadMyFavorites(); // Refresh client dashboard favorites
+        if (isClient()) loadMyFavorites();
     } catch (error) {
         // Error already displayed
     }
 }
 
 async function removeFavorite(favoriteId) {
-    if (!isClient()) return; // Should not happen due to UI, but for safety
+    if (!isClient()) return;
     if (!confirm('¿Estás seguro de que quieres eliminar este favorito?')) return;
     try {
         await fetchApi(`/favorites/${favoriteId}`, 'DELETE', null, true);
         alert('Favorito eliminado con éxito!');
-        loadMyFavorites(); // Refresh favorites list
+        loadMyFavorites();
     } catch (error) {
         // Error already displayed
     }
@@ -545,8 +630,6 @@ async function loadMyFavorites() {
     if (!isClient()) return;
     try {
         const favorites = await fetchApi(`/users/${CURRENT_USER}/favorites`, 'GET', null, true);
-        // Favorites DTO only returns favorite ID, user ID, equipment ID. We need equipment details.
-        // This is inefficient but simple for vanilla JS. In a real app, backend would return joined data.
         const equipmentPromises = favorites.map(f =>
             fetchApi(`/equipment/${f.idEquipment}`).then(eq => ({ ...eq, favoriteId: f.id }))
         );
@@ -557,233 +640,229 @@ async function loadMyFavorites() {
     }
 }
 
-// --- Provider Dashboard Functions ---
+// --- Admin Dashboard Functions ---
 
-async function loadProviderDashboard() {
-    if (!isProvider()) {
-        showError('Acceso denegado. Solo proveedores.');
+async function loadAdminDashboard() {
+    if (!isAdmin()) {
+        showError('Acceso denegado. Solo administradores.');
         showPage('catalog-page');
         return;
     }
-    showPage('provider-dashboard-page');
-    loadMyEquipment();
-    loadCompanyDetails();
-    // Las marcas, tipos y estados ya no se gestionan desde esta pestaña
-    // Los datos se cargarán en los selectores del modal de equipo.
+    showPage('admin-dashboard-page');
+    loadCompanies();
+    loadBrands();
 }
 
-async function loadMyEquipment() {
-    if (!isProvider()) return;
+async function loadCompanies() {
     try {
-        // Frontend va a obtener el ID del proveedor a partir del ID del usuario actual
-        const providerData = await fetchApi(`/users/${CURRENT_USER}/provider`, 'GET', null, true);
-        if (!providerData || !providerData.id) {
-            myEquipmentListDiv.innerHTML = '<p>No se pudo cargar la información del proveedor. Asegúrate de que el backend tenga el endpoint /api/users/{id}/provider y que devuelva el ID del proveedor.</p>';
-            return;
-        }
-        const providerId = providerData.id;
-
-        // Ahora, se solicita al backend los equipos de ESE proveedor.
-        const myEquipment = await fetchApi(`/equipment/provider/${providerId}`, 'GET', null, true);
-        renderEquipmentList(myEquipment, myEquipmentListDiv, 'provider-dashboard');
+        const companies = await fetchApi('/companies');
+        renderCompaniesList(companies);
     } catch (error) {
-        myEquipmentListDiv.innerHTML = '<p>Error al cargar mis equipos.</p>';
+        companiesListDiv.innerHTML = '<p>Error al cargar empresas.</p>';
     }
 }
 
-
-async function openEquipmentModalForEdit(equipmentId = null) {
-    // Populate dropdowns with current data
-    await populateEquipmentFormDropdowns();
-    equipmentModal.classList.remove('hidden');
-
-    if (equipmentId) {
-        equipmentModalTitle.textContent = 'Editar Equipo';
-        try {
-            const equipment = await fetchApi(`/equipment/${equipmentId}`);
-            document.getElementById('equipment-id').value = equipment.id;
-            document.getElementById('equipment-name').value = equipment.name;
-            document.getElementById('equipment-description').value = equipment.description;
-            document.getElementById('equipment-price').value = equipment.price;
-            // CORREGIDO: Usar la referencia correcta al input de URL de imagen
-            equipmentUrlImageInput.value = equipment.urlImage;
-            document.getElementById('equipment-type-id').value = equipment.idTypeEquipment;
-            document.getElementById('equipment-state-id').value = equipment.idStateEquipment;
-            document.getElementById('equipment-brand-id').value = equipment.idBrand;
-        } catch (error) {
-            alert('Error al cargar datos del equipo para edición.');
-            equipmentModal.classList.add('hidden');
-        }
-    } else {
-        equipmentModalTitle.textContent = 'Añadir Equipo';
-        equipmentForm.reset();
-        document.getElementById('equipment-id').value = ''; // Clear ID for new equipment
+function renderCompaniesList(companies) {
+    companiesListDiv.innerHTML = '';
+    if (companies.length === 0) {
+        companiesListDiv.innerHTML = '<p>No hay empresas registradas.</p>';
+        return;
     }
-}
 
-async function populateEquipmentFormDropdowns() {
-    try {
-        const types = await fetchApi('/types-equipment');
-        populateSelect(equipmentTypeIdSelect, types, 'id', 'type');
-        const states = await fetchApi('/states-equipment');
-        populateSelect(equipmentStateIdSelect, states, 'id', 'state');
-        const brands = await fetchApi('/brands');
-        populateSelect(equipmentBrandIdSelect, brands, 'id', 'nameBrand');
-    } catch (error) {
-        showError('No se pudieron cargar las opciones para el equipo.');
-        equipmentModal.classList.add('hidden');
-    }
-}
-
-function populateSelect(selectElement, data, valueKey, textKey) {
-    // Mejorado el placeholder, si el elemento previo es input y tiene placeholder, úsalo
-    // o un valor por defecto basado en el ID del select
-    const placeholderText = selectElement.previousElementSibling && selectElement.previousElementSibling.placeholder
-                            ? selectElement.previousElementSibling.placeholder
-                            : selectElement.id.replace(/-/g, ' '); // Reemplazar guiones por espacios
-    selectElement.innerHTML = `<option value="">Selecciona ${placeholderText}</option>`;
-
-    data.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item[valueKey];
-        option.textContent = item[textKey];
-        selectElement.appendChild(option);
+    companies.forEach(company => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `
+            <div class="list-item-content">
+                <h4>${company.name}</h4>
+                <p>${company.email || 'Sin email'} | ${company.phone || 'Sin teléfono'}</p>
+                <p>${company.address || 'Sin dirección'}</p>
+            </div>
+            <div class="list-item-buttons">
+                <button class="btn" data-id="${company.id}">Gestionar Marcas</button>
+                <button class="btn edit-btn" data-id="${company.id}">Editar</button>
+                <button class="btn delete-btn" data-id="${company.id}">Eliminar</button>
+            </div>
+        `;
+        
+        item.querySelector('.btn:not(.edit-btn):not(.delete-btn)').addEventListener('click', (e) => {
+            openManageCompanyBrandsModal(e.target.dataset.id);
+        });
+        item.querySelector('.edit-btn').addEventListener('click', (e) => {
+            openCompanyModalForEdit(e.target.dataset.id);
+        });
+        item.querySelector('.delete-btn').addEventListener('click', (e) => {
+            deleteCompany(e.target.dataset.id);
+        });
+        
+        companiesListDiv.appendChild(item);
     });
 }
 
-async function handleEquipmentFormSubmit(event) {
-    event.preventDefault();
-    const equipmentId = document.getElementById('equipment-id').value;
-    const method = equipmentId ? 'PUT' : 'POST';
-    const url = equipmentId ? `/equipment/${equipmentId}` : '/equipment';
+async function loadBrands() {
+    try {
+        const brands = await fetchApi('/brands');
+        renderBrandsList(brands);
+    } catch (error) {
+        brandsListDiv.innerHTML = '<p>Error al cargar marcas.</p>';
+    }
+}
 
-    const equipmentData = {
-        name: document.getElementById('equipment-name').value,
-        description: document.getElementById('equipment-description').value,
-        price: parseFloat(document.getElementById('equipment-price').value),
-        // CORREGIDO: Obtener el valor del input de URL de imagen
-        urlImage: equipmentUrlImageInput.value, 
-        typeId: parseInt(document.getElementById('equipment-type-id').value),
-        stateId: parseInt(document.getElementById('equipment-state-id').value),
-        brandId: parseInt(document.getElementById('equipment-brand-id').value),
+function renderBrandsList(brands) {
+    brandsListDiv.innerHTML = '';
+    if (brands.length === 0) {
+        brandsListDiv.innerHTML = '<p>No hay marcas registradas.</p>';
+        return;
+    }
+
+    brands.forEach(brand => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `
+            <div class="list-item-content">
+                <span>${brand.nameBrand}</span>
+            </div>
+            <div class="list-item-buttons">
+                <button class="btn edit-btn" data-id="${brand.id}">Editar</button>
+                <button class="btn delete-btn" data-id="${brand.id}">Eliminar</button>
+            </div>
+        `;
+        
+        item.querySelector('.edit-btn').addEventListener('click', (e) => {
+            openBrandModalForEdit(e.target.dataset.id);
+        });
+        item.querySelector('.delete-btn').addEventListener('click', (e) => {
+            deleteBrand(e.target.dataset.id);
+        });
+        
+        brandsListDiv.appendChild(item);
+    });
+}
+
+// Company Management
+async function openCompanyModalForEdit(companyId = null) {
+    companyModal.classList.remove('hidden');
+    
+    if (companyId) {
+        companyModalTitle.textContent = 'Editar Empresa';
+        try {
+            const company = await fetchApi(`/companies/${companyId}`);
+            companyIdInput.value = company.id;
+            companyNameInput.value = company.name;
+            companyEmailInput.value = company.email || '';
+            companyPhoneInput.value = company.phone || '';
+            companyAddressInput.value = company.address || '';
+            companyWebsiteInput.value = company.webSite || '';
+        } catch (error) {
+            alert('Error al cargar datos de la empresa.');
+            companyModal.classList.add('hidden');
+        }
+    } else {
+        companyModalTitle.textContent = 'Añadir Empresa';
+        companyForm.reset();
+        companyIdInput.value = '';
+    }
+}
+
+async function handleCompanyFormSubmit(event) {
+    event.preventDefault();
+    const companyId = companyIdInput.value;
+    const method = companyId ? 'PUT' : 'POST';
+    const url = companyId ? `/companies/${companyId}` : '/companies';
+
+    const companyData = {
+        name: companyNameInput.value,
+        email: companyEmailInput.value,
+        phone: companyPhoneInput.value,
+        address: companyAddressInput.value,
+        webSite: companyWebsiteInput.value
     };
 
+    if (companyId) {
+        companyData.id = parseInt(companyId);
+    }
+
     try {
-        await fetchApi(url, method, equipmentData, true);
-        alert(equipmentId ? 'Equipo actualizado con éxito!' : 'Equipo añadido con éxito!');
-        equipmentModal.classList.add('hidden');
-        loadMyEquipment(); // Refresh provider's equipment list
-        loadCatalog(); // Refresh main catalog
+        await fetchApi(url, method, companyData, true);
+        alert(companyId ? 'Empresa actualizada con éxito!' : 'Empresa añadida con éxito!');
+        companyModal.classList.add('hidden');
+        loadCompanies();
+        // Recargar las opciones de empresa en el formulario de registro
+        loadCompaniesForRegister();
     } catch (error) {
         // Error already displayed
     }
 }
 
-async function deleteEquipment(equipmentId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este equipo? Esta acción es irreversible.')) return;
+async function deleteCompany(companyId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta empresa? Esta acción es irreversible.')) return;
     try {
-        await fetchApi(`/equipment/${equipmentId}`, 'DELETE', null, true);
-        alert('Equipo eliminado con éxito!');
-        loadMyEquipment(); // Refresh provider's equipment list
-        loadCatalog(); // Refresh main catalog
-    } catch (error) { // AGREGADO: Bloque catch para manejar errores
-        console.error("Error al eliminar equipo:", error);
-    }
-}
-
-async function loadCompanyDetails() {
-    if (!isProvider() || !USER_COMPANY_ID) {
-        companyDetailsView.innerHTML = '<p>No hay información de compañía asociada o no tienes permisos.</p>';
-        return;
-    }
-    try {
-        const company = await fetchApi(`/companies/${USER_COMPANY_ID}`);
-        document.getElementById('view-company-name').textContent = company.name;
-        document.getElementById('view-company-email').textContent = company.email || 'N/A';
-        document.getElementById('view-company-phone').textContent = company.phone || 'N/A';
-        document.getElementById('view-company-address').textContent = company.address || 'N/A';
-        document.getElementById('view-company-website').textContent = company.webSite || 'N/A';
-        
-        // Populate edit form fields
-        document.getElementById('edit-company-name').value = company.name;
-        document.getElementById('edit-company-email').value = company.email;
-        document.getElementById('edit-company-phone').value = company.phone;
-        document.getElementById('edit-company-address').value = company.address;
-        document.getElementById('edit-company-website').value = company.webSite;
-
-        loadCompanyBrands(USER_COMPANY_ID);
-
-    } catch (error) {
-        companyDetailsView.innerHTML = '<p>Error al cargar la información de la compañía.</p>';
-    }
-}
-
-async function handleEditCompanyFormSubmit(event) {
-    event.preventDefault();
-    if (!USER_COMPANY_ID) return;
-
-    const companyData = {
-        id: USER_COMPANY_ID, // Include ID for update
-        name: document.getElementById('edit-company-name').value,
-        email: document.getElementById('edit-company-email').value,
-        phone: document.getElementById('edit-company-phone').value,
-        address: document.getElementById('edit-company-address').value,
-        webSite: document.getElementById('edit-company-website').value,
-    };
-
-    try {
-        await fetchApi(`/companies/${USER_COMPANY_ID}`, 'PUT', companyData, true);
-        alert('Información de compañía actualizada con éxito!');
-        companyDetailsView.classList.remove('hidden');
-        editCompanyForm.classList.add('hidden');
-        loadCompanyDetails(); // Reload company details
+        await fetchApi(`/companies/${companyId}`, 'DELETE', null, true);
+        alert('Empresa eliminada con éxito!');
+        loadCompanies();
     } catch (error) {
         // Error already displayed
     }
 }
 
 // Company Brands Management
+async function openManageCompanyBrandsModal(companyId) {
+    try {
+        const company = await fetchApi(`/companies/${companyId}`);
+        manageBrandsCompanyName.textContent = company.name;
+        manageBrandsCompanyId.value = companyId;
+        
+        await loadCompanyBrands(companyId);
+        await loadAvailableBrandsForAssociation();
+        
+        manageCompanyBrandsModal.classList.remove('hidden');
+    } catch (error) {
+        showError('Error al cargar información de la empresa');
+    }
+}
+
 async function loadCompanyBrands(companyId) {
     try {
         const brands = await fetchApi(`/companies/${companyId}/brands`);
-        companyBrandsListDiv.innerHTML = '';
+        manageBrandsListDiv.innerHTML = '';
+        
         if (brands.length === 0) {
-            companyBrandsListDiv.innerHTML = '<p>No hay marcas asociadas.</p>';
+            manageBrandsListDiv.innerHTML = '<p>No hay marcas asociadas a esta empresa.</p>';
             return;
         }
+        
         brands.forEach(brand => {
-            const li = document.createElement('div');
-            li.className = 'list-item';
-            li.innerHTML = `
-                <div class="list-item-content">
-                    <span>${brand.nameBrand}</span>
-                </div>
-                <div class="list-item-buttons">
-                    <button class="btn delete-btn" data-brand-id="${brand.id}" data-company-id="${companyId}">Desasociar</button>
-                </div>
+            const item = document.createElement('div');
+            item.className = 'brand-item';
+            item.innerHTML = `
+                <span>${brand.nameBrand}</span>
+                <button class="btn delete-btn" data-brand-id="${brand.id}" data-company-id="${companyId}">Desasociar</button>
             `;
-            li.querySelector('.delete-btn').addEventListener('click', (e) => removeCompanyBrand(e.target.dataset.companyId, e.target.dataset.brandId));
-            companyBrandsListDiv.appendChild(li);
+            
+            item.querySelector('.delete-btn').addEventListener('click', (e) => {
+                removeCompanyBrand(e.target.dataset.companyId, e.target.dataset.brandId);
+            });
+            
+            manageBrandsListDiv.appendChild(item);
         });
     } catch (error) {
-        companyBrandsListDiv.innerHTML = '<p>Error al cargar marcas asociadas.</p>';
+        manageBrandsListDiv.innerHTML = '<p>Error al cargar marcas asociadas.</p>';
     }
 }
 
-async function openAssociateBrandModal() {
+async function loadAvailableBrandsForAssociation() {
     try {
-        const allBrands = await fetchApi('/brands'); // Get all available brands
-        populateSelect(associateBrandIdSelect, allBrands, 'id', 'nameBrand');
-        companyBrandModal.classList.remove('hidden');
+        const allBrands = await fetchApi('/brands');
+        populateSelect(selectBrandToAssociate, allBrands, 'id', 'nameBrand', 'Selecciona una marca');
     } catch (error) {
-        showError('No se pudieron cargar las marcas para asociar.');
+        showError('No se pudieron cargar las marcas disponibles.');
     }
 }
 
-async function handleCompanyBrandFormSubmit(event) {
+async function handleAssociateBrandFormSubmit(event) {
     event.preventDefault();
-    if (!USER_COMPANY_ID) return;
-    const brandId = associateBrandIdSelect.value;
+    const companyId = manageBrandsCompanyId.value;
+    const brandId = selectBrandToAssociate.value;
 
     if (!brandId) {
         showError('Por favor, selecciona una marca.');
@@ -791,10 +870,10 @@ async function handleCompanyBrandFormSubmit(event) {
     }
 
     try {
-        await fetchApi(`/companies/${USER_COMPANY_ID}/brands/${brandId}`, 'POST', null, true);
+        await fetchApi(`/companies/${companyId}/brands/${brandId}`, 'POST', null, true);
         alert('Marca asociada con éxito!');
-        companyBrandModal.classList.add('hidden');
-        loadCompanyBrands(USER_COMPANY_ID);
+        loadCompanyBrands(companyId);
+        associateBrandForm.reset();
     } catch (error) {
         // Error already displayed
     }
@@ -811,145 +890,230 @@ async function removeCompanyBrand(companyId, brandId) {
     }
 }
 
-// MEJORADO: renderGenericList para NO mostrar botones de editar/eliminar en Types y States
-function renderGenericList(items, container, entityType, nameKey) {
-    container.innerHTML = ''; // Limpiar el contenido previo
-    if (items.length === 0) {
-        container.innerHTML = `<p>No hay ${entityType}s disponibles.</p>`;
-        return;
-    }
-    items.forEach(item => {
-        const li = document.createElement('div');
-        li.className = 'list-item';
-        li.innerHTML = `
-            <div class="list-item-content">
-                <span>${item[nameKey]}</span>
-            </div>
-            <div class="list-item-buttons">
-                ${entityType === 'brand' ? `
-                    <button class="btn edit-btn" data-id="${item.id}" data-type="${entityType}">Editar</button>
-                    <button class="btn delete-btn" data-id="${item.id}" data-type="${entityType}">Eliminar</button>
-                ` : ''}
-                <!-- Botón "Ver Detalles" para Tipos y Estados, ya que no son editables/eliminables -->
-                ${entityType === 'type' || entityType === 'state' ? `
-                    <button class="btn" data-id="${item.id}" data-type="${entityType}">Ver Detalles</button>
-                ` : ''}
-            </div>
-        `;
-        // Adjuntar event listeners solo si los botones son renderizados para este entityType
-        if (entityType === 'brand') {
-            li.querySelector('.edit-btn').addEventListener('click', (e) => openGenericModalForEdit(e.target.dataset.id, e.target.dataset.type));
-            li.querySelector('.delete-btn').addEventListener('click', (e) => deleteGenericEntity(e.target.dataset.id, e.target.dataset.type));
-        } else if (entityType === 'type' || entityType === 'state') {
-            // Adjuntar listener para "Ver Detalles" en Tipos y Estados
-            li.querySelector('.btn').addEventListener('click', (e) => openGenericModalForEdit(e.target.dataset.id, e.target.dataset.type));
-        }
-        container.appendChild(li);
-    });
-}
-
-// MEJORADO: openGenericModalForEdit para deshabilitar inputs y ocultar botones para tipos/estados
-async function openGenericModalForEdit(id = null, entityType) {
-    const modal = document.getElementById(`${entityType}-modal`);
-    const form = document.getElementById(`${entityType}-form`);
-    const title = document.getElementById(`${entityType}-modal-title`);
-    const idInput = form.querySelector(`#${entityType}-id`);
-    const nameInput = form.querySelector(`#${entityType}-name`);
-    const submitBtn = form.querySelector('button[type="submit"]');
-
-    if (entityType === 'type' || entityType === 'state') {
-        nameInput.disabled = true; // Deshabilitar input
-        if (submitBtn) submitBtn.classList.add('hidden'); // Ocultar botón de guardar
-        title.textContent = `Detalles de ${entityType.charAt(0).toUpperCase() + entityType.slice(1)}`; // Título de "Detalles"
-    } else { // Es una marca
-        nameInput.disabled = false;
-        if (submitBtn) submitBtn.classList.remove('hidden'); // Mostrar botón de guardar
-        title.textContent = id ? `Editar ${entityType.charAt(0).toUpperCase() + entityType.slice(1)}` : `Añadir ${entityType.charAt(0).toUpperCase() + entityType.slice(1)}`; // Título de "Editar" o "Añadir"
-    }
-
-    modal.classList.remove('hidden');
-
-    if (id) {
+// Brand Management
+async function openBrandModalForEdit(brandId = null) {
+    brandModal.classList.remove('hidden');
+    
+    if (brandId) {
+        brandModalTitle.textContent = 'Editar Marca';
         try {
-            // Los endpoints correctos son /types-equipment y /states-equipment
-            const data = await fetchApi(`/${entityType}s${entityType === 'type' || entityType === 'state' ? '-equipment' : ''}/${id}`);
-            idInput.value = data.id;
-            // CORREGIDO: nameKey para la propiedad del objeto de respuesta (type, state, nameBrand)
-            nameInput.value = data[entityType === 'brand' ? 'nameBrand' : entityType];
+            const brand = await fetchApi(`/brands/${brandId}`);
+            brandIdInput.value = brand.id;
+            brandNameInput.value = brand.nameBrand;
         } catch (error) {
-            alert(`Error al cargar datos de ${entityType} para ${entityType === 'brand' ? 'edición' : 'visualización'}.`);
-            modal.classList.add('hidden');
+            alert('Error al cargar datos de la marca.');
+            brandModal.classList.add('hidden');
         }
     } else {
-        // Si se intenta "añadir" y es tipo/estado, mostrar error y ocultar modal
-        if (entityType === 'type' || entityType === 'state') {
-             showError(`No se permite añadir ${entityType}s directamente desde la UI. Estos valores son fijos.`);
-             modal.classList.add('hidden');
-             return;
-        }
-        form.reset();
-        idInput.value = '';
+        brandModalTitle.textContent = 'Añadir Marca';
+        brandForm.reset();
+        brandIdInput.value = '';
     }
 }
 
-// MEJORADO: handleGenericFormSubmit para bloquear envío de tipos/estados
-async function handleGenericFormSubmit(event) {
+async function handleBrandFormSubmit(event) {
     event.preventDefault();
-    const form = event.target;
-    const entityType = form.id.replace('-form', '');
-    const id = form.querySelector(`#${entityType}-id`).value;
-    const name = form.querySelector(`#${entityType}-name`).value;
+    const brandId = brandIdInput.value;
+    const method = brandId ? 'PUT' : 'POST';
+    const url = brandId ? `/brands/${brandId}` : '/brands';
 
-    // Bloquear submit para tipos y estados desde el frontend
-    if (entityType === 'type' || entityType === 'state') {
-        showError(`No se permite modificar ${entityType}s directamente desde la UI.`);
-        document.getElementById(`${entityType}-modal`).classList.add('hidden');
-        return;
-    }
-
-    const method = id ? 'PUT' : 'POST';
-    const url = id ? `/${entityType}s/${id}` : `/${entityType}s`;
-
-    const body = {};
-    if (entityType === 'brand') body.nameBrand = name;
-    // Ya no hay manejo de `type` o `state` aquí porque no se pueden modificar
+    const brandData = {
+        nameBrand: brandNameInput.value
+    };
 
     try {
-        await fetchApi(url, method, body, true); // Requires auth
-        alert(`${entityType.charAt(0).toUpperCase() + entityType.slice(1)} guardado con éxito!`);
-        document.getElementById(`${entityType}-modal`).classList.add('hidden');
-        // Refresh appropriate list
-        if (entityType === 'brand') loadBrands();
-        // Las listas de tipos y estados no necesitan ser refrescadas ya que no se modifican
-        if (equipmentModal.classList.contains('hidden') === false) { // Si el modal de equipo está abierto
-             populateEquipmentFormDropdowns();
-        }
-
+        await fetchApi(url, method, brandData, true);
+        alert(brandId ? 'Marca actualizada con éxito!' : 'Marca añadida con éxito!');
+        brandModal.classList.add('hidden');
+        loadBrands();
     } catch (error) {
         // Error already displayed
     }
 }
 
-// MEJORADO: deleteGenericEntity para bloquear eliminación de tipos/estados
-async function deleteGenericEntity(id, entityType) {
-    // Bloquear eliminación para tipos y estados desde el frontend
-    if (entityType === 'type' || entityType === 'state') {
-        showError(`No se permite eliminar ${entityType}s directamente desde la UI.`);
+async function deleteBrand(brandId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta marca? Esta acción es irreversible.')) return;
+    try {
+        await fetchApi(`/brands/${brandId}`, 'DELETE', null, true);
+        alert('Marca eliminada con éxito!');
+        loadBrands();
+    } catch (error) {
+        // Error already displayed
+    }
+}
+
+// --- Provider Dashboard Functions ---
+
+async function loadProviderDashboard() {
+    if (!isProvider()) {
+        showError('Acceso denegado. Solo proveedores.');
+        showPage('catalog-page');
         return;
     }
+    showPage('provider-dashboard-page');
+    loadMyEquipment();
+    loadCompanyDetails();
+}
 
-    if (!confirm(`¿Estás seguro de que quieres eliminar este ${entityType}? Esta acción es irreversible.`)) return;
+async function loadMyEquipment() {
+    if (!isProvider()) return;
     try {
-        await fetchApi(`/${entityType}s/${id}`, 'DELETE', null, true); // Requires auth
-        alert(`${entityType.charAt(0).toUpperCase() + entityType.slice(1)} eliminado con éxito!`);
-        // Refresh appropriate list
-        if (entityType === 'brand') loadBrands();
-        // Las listas de tipos y estados no necesitan ser refrescadas ya que no se modifican
-        if (equipmentModal.classList.contains('hidden') === false) {
-             populateEquipmentFormDropdowns();
+        const providerData = await fetchApi(`/users/${CURRENT_USER}/provider`, 'GET', null, true);
+        if (!providerData || !providerData.id) {
+            myEquipmentListDiv.innerHTML = '<p>No se pudo cargar la información del proveedor.</p>';
+            return;
+        }
+        const providerId = providerData.id;
+        const myEquipment = await fetchApi(`/equipment/provider/${providerId}`, 'GET', null, true);
+        renderEquipmentList(myEquipment, myEquipmentListDiv, 'provider-dashboard');
+    } catch (error) {
+        myEquipmentListDiv.innerHTML = '<p>Error al cargar mis equipos.</p>';
+    }
+}
+
+async function openEquipmentModalForEdit(equipmentId = null) {
+    await populateEquipmentFormDropdowns();
+    equipmentModal.classList.remove('hidden');
+
+    if (equipmentId) {
+        equipmentModalTitle.textContent = 'Editar Equipo';
+        try {
+            const equipment = await fetchApi(`/equipment/${equipmentId}`);
+            equipmentIdInput.value = equipment.id;
+            equipmentNameInput.value = equipment.name;
+            equipmentDescriptionInput.value = equipment.description || '';
+            equipmentPriceInput.value = equipment.price;
+            equipmentUrlImageInput.value = equipment.urlImage || '';
+            equipmentTypeIdSelect.value = equipment.idTypeEquipment;
+            equipmentStateIdSelect.value = equipment.idStateEquipment;
+            equipmentBrandIdSelect.value = equipment.idBrand;
+        } catch (error) {
+            alert('Error al cargar datos del equipo para edición.');
+            equipmentModal.classList.add('hidden');
+        }
+    } else {
+        equipmentModalTitle.textContent = 'Añadir Equipo';
+        equipmentForm.reset();
+        equipmentIdInput.value = '';
+    }
+}
+
+async function populateEquipmentFormDropdowns() {
+    try {
+        // Cargar tipos de equipo
+        const types = await fetchApi('/types-equipment');
+        populateSelect(equipmentTypeIdSelect, types, 'id', 'type', 'Selecciona tipo de equipo');
+        
+        // Cargar estados de equipo
+        const states = await fetchApi('/states-equipment');
+        populateSelect(equipmentStateIdSelect, states, 'id', 'state', 'Selecciona estado del equipo');
+        
+        // Cargar solo las marcas de la empresa del proveedor
+        if (USER_COMPANY_ID) {
+            const companyBrands = await fetchApi(`/companies/${USER_COMPANY_ID}/brands`);
+            populateSelect(equipmentBrandIdSelect, companyBrands, 'id', 'nameBrand', 'Selecciona marca');
         }
     } catch (error) {
-        console.error(`Error al eliminar ${entityType}:`, error);
+        showError('No se pudieron cargar las opciones para el equipo.');
+        equipmentModal.classList.add('hidden');
+    }
+}
+
+async function handleEquipmentFormSubmit(event) {
+    event.preventDefault();
+    const equipmentId = equipmentIdInput.value;
+    const method = equipmentId ? 'PUT' : 'POST';
+    const url = equipmentId ? `/equipment/${equipmentId}` : '/equipment';
+
+    const equipmentData = {
+        name: equipmentNameInput.value,
+        description: equipmentDescriptionInput.value,
+        price: parseFloat(equipmentPriceInput.value),
+        urlImage: equipmentUrlImageInput.value,
+        typeId: parseInt(equipmentTypeIdSelect.value),
+        stateId: parseInt(equipmentStateIdSelect.value),
+        brandId: parseInt(equipmentBrandIdSelect.value)
+    };
+
+    try {
+        await fetchApi(url, method, equipmentData, true);
+        alert(equipmentId ? 'Equipo actualizado con éxito!' : 'Equipo añadido con éxito!');
+        equipmentModal.classList.add('hidden');
+        loadMyEquipment();
+        loadCatalog(); // Refresh main catalog
+    } catch (error) {
+        // Error already displayed
+    }
+}
+
+async function deleteEquipment(equipmentId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este equipo? Esta acción es irreversible.')) return;
+    try {
+        await fetchApi(`/equipment/${equipmentId}`, 'DELETE', null, true);
+        alert('Equipo eliminado con éxito!');
+        loadMyEquipment();
+        loadCatalog();
+    } catch (error) {
+        // Error already displayed
+    }
+}
+
+async function loadCompanyDetails() {
+    if (!isProvider() || !USER_COMPANY_ID) {
+        companyDetailsView.innerHTML = '<p>No hay información de compañía asociada.</p>';
+        return;
+    }
+    try {
+        const company = await fetchApi(`/companies/${USER_COMPANY_ID}`);
+        viewCompanyName.textContent = company.name;
+        viewCompanyEmail.textContent = company.email || 'N/A';
+        viewCompanyPhone.textContent = company.phone || 'N/A';
+        viewCompanyAddress.textContent = company.address || 'N/A';
+        viewCompanyWebsite.textContent = company.webSite || 'N/A';
+        
+        loadCompanyBrandsForProvider(USER_COMPANY_ID);
+    } catch (error) {
+        companyDetailsView.innerHTML = '<p>Error al cargar la información de la compañía.</p>';
+    }
+}
+
+async function loadCompanyBrandsForProvider(companyId) {
+    try {
+        const brands = await fetchApi(`/companies/${companyId}/brands`);
+        companyBrandsListDiv.innerHTML = '';
+        if (brands.length === 0) {
+            companyBrandsListDiv.innerHTML = '<p>No hay marcas asociadas.</p>';
+            return;
+        }
+        brands.forEach(brand => {
+            const li = document.createElement('div');
+            li.className = 'list-item';
+            li.innerHTML = `<div class="list-item-content"><span>${brand.nameBrand}</span></div>`;
+            companyBrandsListDiv.appendChild(li);
+        });
+    } catch (error) {
+        companyBrandsListDiv.innerHTML = '<p>Error al cargar marcas asociadas.</p>';
+    }
+}
+
+// --- Utility Functions ---
+
+function populateSelect(selectElement, data, valueKey, textKey, defaultText = 'Selecciona una opción') {
+    selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+    data.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item[valueKey];
+        option.textContent = item[textKey];
+        selectElement.appendChild(option);
+    });
+}
+
+async function loadCompaniesForRegister() {
+    try {
+        const companies = await fetchApi('/companies');
+        populateSelect(providerCompanySelect, companies, 'id', 'name', 'Selecciona una empresa');
+    } catch (error) {
+        console.error('Error cargando empresas para registro:', error);
     }
 }
 
@@ -957,21 +1121,58 @@ async function deleteGenericEntity(id, entityType) {
 
 // Navigation
 navCatalogBtn.addEventListener('click', () => { showPage('catalog-page'); loadCatalog(); });
-navLoginBtn.addEventListener('click', () => showPage('auth-page')); // navLoginBtn es ahora nav-auth
+navLoginBtn.addEventListener('click', () => showPage('auth-page'));
 navLogoutBtn.addEventListener('click', handleLogout);
+navAdminDashboardBtn.addEventListener('click', loadAdminDashboard);
 navProviderDashboardBtn.addEventListener('click', loadProviderDashboard);
-navClientDashboardBtn.addEventListener('click', () => { showPage('client-dashboard-page'); loadMyFavorites(); });
-backToCatalogBtn.addEventListener('click', () => { showPage('catalog-page'); loadCatalog(); });
+navClientDashboardBtn.addEventListener('click', () => { 
+    showPage('client-dashboard-page'); 
+    loadMyFavorites(); 
+});
+backToCatalogBtn.addEventListener('click', () => { 
+    showPage('catalog-page'); 
+    loadCatalog(); 
+});
 
 // Auth Forms
 loginForm.addEventListener('submit', handleLogin);
 registerForm.addEventListener('submit', handleRegister);
-registerUserTypeSelect.addEventListener('change', (e) => {
-    providerFieldsDiv.classList.toggle('hidden', e.target.value !== 'proveedor');
+registerUserTypeSelect.addEventListener('change', async (e) => {
+    if (e.target.value === 'proveedor') {
+        providerFieldsDiv.classList.remove('hidden');
+        await loadCompaniesForRegister();
+    } else {
+        providerFieldsDiv.classList.add('hidden');
+    }
 });
+
+// Catalog Filters
+applyFiltersBtn.addEventListener('click', applyFilters);
+clearFiltersBtn.addEventListener('click', clearFilters);
 
 // Review Submit
 submitReviewBtn.addEventListener('click', submitReview);
+
+// Admin Dashboard
+adminTabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+        document.querySelectorAll('#admin-dashboard-page .tab-content').forEach(content => content.classList.add('hidden'));
+        document.querySelectorAll('#admin-dashboard-page .tab-button').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`${e.target.dataset.tab}-tab`).classList.remove('hidden');
+        e.target.classList.add('active');
+
+        if (e.target.dataset.tab === 'admin-companies') loadCompanies();
+        else if (e.target.dataset.tab === 'admin-brands') loadBrands();
+    });
+});
+
+addCompanyBtn.addEventListener('click', () => openCompanyModalForEdit(null));
+companyForm.addEventListener('submit', handleCompanyFormSubmit);
+
+addBrandBtn.addEventListener('click', () => openBrandModalForEdit(null));
+brandForm.addEventListener('submit', handleBrandFormSubmit);
+
+associateBrandForm.addEventListener('submit', handleAssociateBrandFormSubmit);
 
 // Provider Dashboard
 providerTabs.forEach(tab => {
@@ -981,7 +1182,6 @@ providerTabs.forEach(tab => {
         document.getElementById(`${e.target.dataset.tab}-tab`).classList.remove('hidden');
         e.target.classList.add('active');
 
-        // Load data specific to the tab
         if (e.target.dataset.tab === 'provider-equipment') loadMyEquipment();
         else if (e.target.dataset.tab === 'provider-company') loadCompanyDetails();
     });
@@ -989,20 +1189,6 @@ providerTabs.forEach(tab => {
 
 addEquipmentBtn.addEventListener('click', () => openEquipmentModalForEdit(null));
 equipmentForm.addEventListener('submit', handleEquipmentFormSubmit);
-
-editCompanyBtn.addEventListener('click', () => {
-    companyDetailsView.classList.add('hidden');
-    editCompanyForm.classList.remove('hidden');
-});
-cancelEditCompanyBtn.addEventListener('click', () => {
-    companyDetailsView.classList.remove('hidden');
-    editCompanyForm.classList.add('hidden');
-});
-editCompanyForm.addEventListener('submit', handleEditCompanyFormSubmit);
-
-addCompanyBrandBtn.addEventListener('click', openAssociateBrandModal);
-companyBrandForm.addEventListener('submit', handleCompanyBrandFormSubmit);
-
 
 // Client Dashboard
 clientTabs.forEach(tab => {
@@ -1012,28 +1198,43 @@ clientTabs.forEach(tab => {
         document.getElementById(`${e.target.dataset.tab}-tab`).classList.remove('hidden');
         e.target.classList.add('active');
 
-        // Load data specific to the tab
         if (e.target.dataset.tab === 'client-favorites') loadMyFavorites();
         else if (e.target.dataset.tab === 'client-reviews') loadMyReviews();
     });
 });
 
-// Generic Add Buttons (Solo Marca es editable/añadible)
-addBrandBtn.addEventListener('click', () => openGenericModalForEdit(null, 'brand'));
-brandForm.addEventListener('submit', handleGenericFormSubmit);
-
-
 // --- Initialization ---
 function init() {
-    // Check for existing token in localStorage
-    USER_TOKEN = localStorage.getItem('userToken');
-    CURRENT_USER = localStorage.getItem('currentUserId');
-    USER_ROLE = localStorage.getItem('userRole');
-    USER_COMPANY_ID = localStorage.getItem('userCompanyId');
+    // Cargar datos de localStorage
+    const token = localStorage.getItem('userToken');
+    const userId = localStorage.getItem('currentUserId');
+    const role = localStorage.getItem('userRole');
+    const companyId = localStorage.getItem('userCompanyId');
+    
+    // Solo asignar si existen valores válidos
+    if (token && userId && role) {
+        USER_TOKEN = token;
+        CURRENT_USER = userId;
+        USER_ROLE = role;
+        USER_COMPANY_ID = companyId || null;
+    } else {
+        // Limpiar si no hay sesión válida
+        USER_TOKEN = null;
+        CURRENT_USER = null;
+        USER_ROLE = null;
+        USER_COMPANY_ID = null;
+    }
 
     updateAuthUI();
-    showPage('catalog-page');
-    loadCatalog();
+    
+    // Si es admin y está logueado, mostrar el panel de admin
+    if (isAdmin()) {
+        showPage('admin-dashboard-page');
+        loadAdminDashboard();
+    } else {
+        showPage('catalog-page');
+        loadCatalog();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);
