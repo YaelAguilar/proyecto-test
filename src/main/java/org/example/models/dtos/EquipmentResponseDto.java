@@ -10,11 +10,17 @@ public class EquipmentResponseDto {
     private BigDecimal price;
     private String urlImage;
     private Timestamp createdAt;
-    private String providerName; // Nombre del proveedor
-    private String companyName; // Nombre de la compañía del proveedor
-    private String typeName; // Nombre del tipo de equipo
-    private String stateName; // Nombre del estado del equipo
-    private String brandName; // Nombre de la marca
+    private String providerName;
+    private String companyName;
+    private String typeName;
+    private String stateName;
+    private String brandName;
+    
+    // NUEVO: IDs para facilitar filtros en el frontend
+    private int idTypeEquipment;
+    private int idStateEquipment;
+    private int idBrand;
+    private int idCompany;
 
     public EquipmentResponseDto() {}
 
@@ -56,4 +62,14 @@ public class EquipmentResponseDto {
     public void setStateName(String stateName) { this.stateName = stateName; }
     public String getBrandName() { return brandName; }
     public void setBrandName(String brandName) { this.brandName = brandName; }
+    
+    // NUEVO: Getters y Setters para IDs
+    public int getIdTypeEquipment() { return idTypeEquipment; }
+    public void setIdTypeEquipment(int idTypeEquipment) { this.idTypeEquipment = idTypeEquipment; }
+    public int getIdStateEquipment() { return idStateEquipment; }
+    public void setIdStateEquipment(int idStateEquipment) { this.idStateEquipment = idStateEquipment; }
+    public int getIdBrand() { return idBrand; }
+    public void setIdBrand(int idBrand) { this.idBrand = idBrand; }
+    public int getIdCompany() { return idCompany; }
+    public void setIdCompany(int idCompany) { this.idCompany = idCompany; }
 }

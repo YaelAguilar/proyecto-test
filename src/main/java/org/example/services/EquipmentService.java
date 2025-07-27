@@ -5,6 +5,7 @@ import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.NotFoundResponse;
 import org.example.models.Brand;
 import org.example.models.Company;
+import org.example.models.CompanyBrand;
 import org.example.models.Equipment;
 import org.example.models.Provider;
 import org.example.models.StateEquipment;
@@ -13,6 +14,7 @@ import org.example.models.User;
 import org.example.models.dtos.EquipmentCreateUpdateDto;
 import org.example.models.dtos.EquipmentResponseDto;
 import org.example.repositories.IBrandRepository;
+import org.example.repositories.ICompanyBrandRepository;
 import org.example.repositories.ICompanyRepository;
 import org.example.repositories.IEquipmentRepository;
 import org.example.repositories.IProviderRepository;
@@ -36,10 +38,12 @@ public class EquipmentService {
     private final IBrandRepository brandRepository;
     private final IUserRepository userRepository;
     private final ICompanyRepository companyRepository;
+    private final ICompanyBrandRepository companyBrandRepository; // NUEVO
 
     public EquipmentService(IEquipmentRepository equipmentRepository, IProviderRepository providerRepository,
                             ITypeEquipmentRepository typeEquipmentRepository, IStateEquipmentRepository stateEquipmentRepository,
-                            IBrandRepository brandRepository, IUserRepository userRepository, ICompanyRepository companyRepository) {
+                            IBrandRepository brandRepository, IUserRepository userRepository, ICompanyRepository companyRepository,
+                            ICompanyBrandRepository companyBrandRepository) { // MODIFICADO
         this.equipmentRepository = equipmentRepository;
         this.providerRepository = providerRepository;
         this.typeEquipmentRepository = typeEquipmentRepository;
@@ -47,6 +51,7 @@ public class EquipmentService {
         this.brandRepository = brandRepository;
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
+        this.companyBrandRepository = companyBrandRepository; // NUEVO
     }
 
     public List<EquipmentResponseDto> getAllEquipment() {
@@ -57,9 +62,7 @@ public class EquipmentService {
                 .collect(Collectors.toList());
     }
 
-    // NUEVO: Método para obtener equipos por ID de proveedor
     public List<EquipmentResponseDto> getEquipmentByProviderId(int providerId) {
-        // Opcional: Verificar si el providerId existe
         providerRepository.findById(providerId)
             .orElseThrow(() -> new NotFoundResponse("Proveedor no encontrado con ID: " + providerId));
 
@@ -70,6 +73,31 @@ public class EquipmentService {
                 .collect(Collectors.toList());
     }
 
+    // NUEVO: Método para buscar equipos con filtros
+    public List<EquipmentResponseDto> searchEquipment(String name, Integer typeId, Integer stateId, 
+                                                      Integer companyId, Integer brandId) {
+        List<Equipment> allEquipment = equipmentRepository.findAll();
+        
+        // Aplicar filtros
+        List<Equipment> filteredEquipment = allEquipment.stream()
+            .filter(eq -> name == null || name.isEmpty() || 
+                    eq.getName().toLowerCase().contains(name.toLowerCase()))
+            .filter(eq -> typeId == null || eq.getIdTypeEquipment() == typeId)
+            .filter(eq -> stateId == null || eq.getIdStateEquipment() == stateId)
+            .filter(eq -> brandId == null || eq.getIdBrand() == brandId)
+            .filter(eq -> {
+                if (companyId == null) return true;
+                // Obtener el proveedor y verificar su empresa
+                Optional<Provider> provider = providerRepository.findById(eq.getIdProvider());
+                return provider.isPresent() && provider.get().getIdCompany() == companyId;
+            })
+            .collect(Collectors.toList());
+        
+        log.info("Búsqueda de equipos con filtros - Resultados: {}", filteredEquipment.size());
+        return filteredEquipment.stream()
+                .map(this::mapEquipmentToDto)
+                .collect(Collectors.toList());
+    }
 
     public EquipmentResponseDto getEquipmentById(int id) {
         Equipment equipment = equipmentRepository.findById(id)
@@ -99,7 +127,16 @@ public class EquipmentService {
         brandRepository.findById(createDto.getBrandId())
                 .orElseThrow(() -> new BadRequestResponse("Marca inválida con ID: " + createDto.getBrandId()));
 
-        // 4. Mapear DTO a entidad Equipment
+        // NUEVO: 4. Validar que la marca pertenece a la empresa del proveedor
+        List<CompanyBrand> companyBrands = companyBrandRepository.findByCompanyId(provider.getIdCompany());
+        boolean brandBelongsToCompany = companyBrands.stream()
+                .anyMatch(cb -> cb.getIdBrand() == createDto.getBrandId());
+        
+        if (!brandBelongsToCompany) {
+            throw new BadRequestResponse("La marca seleccionada no está asociada a tu empresa.");
+        }
+
+        // 5. Mapear DTO a entidad Equipment
         Equipment newEquipment = new Equipment();
         newEquipment.setIdProvider(idProvider);
         newEquipment.setIdTypeEquipment(createDto.getTypeId());
@@ -141,7 +178,16 @@ public class EquipmentService {
         brandRepository.findById(updateDto.getBrandId())
                 .orElseThrow(() -> new BadRequestResponse("Marca inválida con ID: " + updateDto.getBrandId()));
 
-        // 5. Actualizar campos de la entidad
+        // NUEVO: 5. Validar que la marca pertenece a la empresa del proveedor
+        List<CompanyBrand> companyBrands = companyBrandRepository.findByCompanyId(provider.getIdCompany());
+        boolean brandBelongsToCompany = companyBrands.stream()
+                .anyMatch(cb -> cb.getIdBrand() == updateDto.getBrandId());
+        
+        if (!brandBelongsToCompany) {
+            throw new BadRequestResponse("La marca seleccionada no está asociada a tu empresa.");
+        }
+
+        // 6. Actualizar campos de la entidad
         existingEquipment.setIdTypeEquipment(updateDto.getTypeId());
         existingEquipment.setName(updateDto.getName());
         existingEquipment.setDescription(updateDto.getDescription());
@@ -155,11 +201,9 @@ public class EquipmentService {
     }
 
     public void deleteEquipment(int equipmentId, int authUserId) {
-        // 1. Buscar equipo
         Equipment existingEquipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new NotFoundResponse("Equipo no encontrado con ID: " + equipmentId));
 
-        // 2. Verificar que el usuario autenticado es el proveedor del equipo
         Provider provider = providerRepository.findByUserId(authUserId)
                 .orElseThrow(() -> new ForbiddenResponse("Solo los proveedores pueden eliminar sus equipos."));
         if (existingEquipment.getIdProvider() != provider.getId()) {
@@ -170,7 +214,6 @@ public class EquipmentService {
         equipmentRepository.delete(equipmentId);
     }
 
-    // Helper method to map Equipment entity to EquipmentResponseDto
     private EquipmentResponseDto mapEquipmentToDto(Equipment equipment) {
         AtomicReference<String> providerNameRef = new AtomicReference<>("N/A");
         AtomicReference<String> companyNameRef = new AtomicReference<>("N/A");
@@ -181,8 +224,7 @@ public class EquipmentService {
             Optional<User> userOpt = userRepository.findById(provider.getIdUser());
             userOpt.ifPresent(user -> providerNameRef.set(user.getFullName()));
 
-            // CORREGIDO: Asegurarse de que idCompany no sea 0 si la DB lo usa como "no asignado"
-            if (provider.getIdCompany() > 0) { // Asumiendo que id_company = 0 o un valor negativo significa 'no company'
+            if (provider.getIdCompany() > 0) {
                 Optional<Company> companyOpt = companyRepository.findById(provider.getIdCompany());
                 companyOpt.ifPresent(company -> companyNameRef.set(company.getName()));
             }

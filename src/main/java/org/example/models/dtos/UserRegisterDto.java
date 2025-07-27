@@ -5,13 +5,11 @@ public class UserRegisterDto {
     private String email;
     private String password;
     private String userType; // "cliente" o "proveedor"
-    // Opcional: Si el proveedor puede registrar una compañía al mismo tiempo
-    private String companyName;
-    private String companyEmail;
-    private String companyPhone;
-    private String companyAddress;
-    private String companyWebSite;
+    // MODIFICADO: Ahora los proveedores seleccionan una empresa existente
+    private Integer companyId; // ID de la empresa seleccionada (solo para proveedores)
 
+    // Los campos de empresa ya no son necesarios porque no se crea empresa al registrar
+    // Eliminados: companyName, companyEmail, companyPhone, companyAddress, companyWebSite
 
     public UserRegisterDto() {}
 
@@ -23,15 +21,6 @@ public class UserRegisterDto {
     public void setPassword(String password) { this.password = password; }
     public String getUserType() { return userType; }
     public void setUserType(String userType) { this.userType = userType; }
-
-    public String getCompanyName() { return companyName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
-    public String getCompanyEmail() { return companyEmail; }
-    public void setCompanyEmail(String companyEmail) { this.companyEmail = companyEmail; }
-    public String getCompanyPhone() { return companyPhone; }
-    public void setCompanyPhone(String companyPhone) { this.companyPhone = companyPhone; }
-    public String getCompanyAddress() { return companyAddress; }
-    public void setCompanyAddress(String companyAddress) { this.companyAddress = companyAddress; }
-    public String getCompanyWebSite() { return companyWebSite; }
-    public void setCompanyWebSite(String companyWebSite) { this.companyWebSite = companyWebSite; }
+    public Integer getCompanyId() { return companyId; }
+    public void setCompanyId(Integer companyId) { this.companyId = companyId; }
 }

@@ -24,8 +24,8 @@ public class ApiRoutes {
         // --- Rutas de Usuarios ---
         app.get("/api/users/{id}", ctx -> {
             String role = AuthUtils.getAuthenticatedUserRole(ctx);
-            if (!role.equalsIgnoreCase("cliente") && !role.equalsIgnoreCase("proveedor")) {
-                throw new io.javalin.http.ForbiddenResponse("Acceso denegado: solo clientes y proveedores pueden acceder a perfiles de usuario.");
+            if (!role.equalsIgnoreCase("cliente") && !role.equalsIgnoreCase("proveedor") && !role.equalsIgnoreCase("administrador")) {
+                throw new io.javalin.http.ForbiddenResponse("Acceso denegado.");
             }
             AuthUtils.requireOwnership(ctx, Integer.parseInt(ctx.pathParam("id")));
             userController.getUserById(ctx);
@@ -33,103 +33,107 @@ public class ApiRoutes {
 
         // OBTENER EL PROVEEDOR ASOCIADO A UN USUARIO
         app.get("/api/users/{id}/provider", ctx -> {
-            AuthUtils.requireRole(ctx, "proveedor"); // Solo proveedores pueden acceder a esta info
-            AuthUtils.requireOwnership(ctx, Integer.parseInt(ctx.pathParam("id"))); // Y solo su propia info de proveedor
-            userController.getProviderByUserId(ctx); // Llama al nuevo método del controlador
+            AuthUtils.requireRole(ctx, "proveedor");
+            AuthUtils.requireOwnership(ctx, Integer.parseInt(ctx.pathParam("id")));
+            userController.getProviderByUserId(ctx);
         });
 
-
         // --- Rutas de Compañías ---
-        app.get("/api/companies", companyController::getAllCompanies); // Obtener todas las compañías (público)
+        app.get("/api/companies", companyController::getAllCompanies); // Público
 
-        app.post("/api/companies", ctx -> { // Crear nueva compañía
-            AuthUtils.requireRole(ctx, "proveedor");
+        // MODIFICADO: Solo administradores pueden crear/actualizar/eliminar empresas
+        app.post("/api/companies", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             companyController.createCompany(ctx);
         });
 
-        app.get("/api/companies/{id}", companyController::getCompanyById); // Obtener compañía por ID (público)
+        app.get("/api/companies/{id}", companyController::getCompanyById); // Público
 
-        app.put("/api/companies/{id}", ctx -> { // Actualizar compañía
-            AuthUtils.requireRole(ctx, "proveedor");
+        app.put("/api/companies/{id}", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             companyController.updateCompany(ctx);
         });
 
-        app.delete("/api/companies/{id}", ctx -> { // Eliminar compañía
-            AuthUtils.requireRole(ctx, "proveedor");
+        app.delete("/api/companies/{id}", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             companyController.deleteCompany(ctx);
         });
 
-        // --- Rutas para Company-Brand (anidadas bajo una compañía específica) ---
-        app.get("/api/companies/{id}/brands", companyController::getBrandsByCompany); // Obtener marcas de una compañía (público)
+        // --- Rutas para Company-Brand ---
+        app.get("/api/companies/{companyId}/brands", companyController::getBrandsByCompany); // Público
 
-        app.post("/api/companies/{id}/brands/{brandId}", ctx -> { // Añadir marca a compañía
-            AuthUtils.requireRole(ctx, "proveedor");
+        // MODIFICADO: Solo administradores pueden asociar/desasociar marcas
+        app.post("/api/companies/{companyId}/brands/{brandId}", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             companyController.addBrandToCompany(ctx);
         });
 
-        app.delete("/api/companies/{id}/brands/{brandId}", ctx -> { // Eliminar marca de compañía
-            AuthUtils.requireRole(ctx, "proveedor");
+        app.delete("/api/companies/{companyId}/brands/{brandId}", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             companyController.removeBrandFromCompany(ctx);
         });
 
-        // --- Rutas de Marcas (Se mantienen CRUD) ---
-        app.get("/api/brands", brandController::getAllBrands); // Obtener todas las marcas (público)
+        // --- Rutas de Marcas ---
+        app.get("/api/brands", brandController::getAllBrands); // Público
 
-        app.post("/api/brands", ctx -> { // Crear nueva marca
-            AuthUtils.requireRole(ctx, "proveedor");
+        // MODIFICADO: Solo administradores pueden gestionar marcas
+        app.post("/api/brands", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             brandController.createBrand(ctx);
         });
 
-        app.get("/api/brands/{id}", brandController::getBrandById); // Obtener marca por ID (público)
+        app.get("/api/brands/{id}", brandController::getBrandById); // Público
 
-        app.put("/api/brands/{id}", ctx -> { // Actualizar marca
-            AuthUtils.requireRole(ctx, "proveedor");
+        app.put("/api/brands/{id}", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             brandController.updateBrand(ctx);
         });
 
-        app.delete("/api/brands/{id}", ctx -> { // Eliminar marca
-            AuthUtils.requireRole(ctx, "proveedor");
+        app.delete("/api/brands/{id}", ctx -> {
+            AuthUtils.requireRole(ctx, "administrador");
             brandController.deleteBrand(ctx);
         });
 
-        // --- Rutas de Tipos de Equipo (Solo GET, ya que los valores son fijos) ---
-        app.get("/api/types-equipment", typeEquipmentController::getAllTypes); // Obtener todos los tipos (público)
-        app.get("/api/types-equipment/{id}", typeEquipmentController::getTypeById); // Obtener tipo por ID (público)
+        // --- Rutas de Tipos de Equipo (Solo lectura) ---
+        app.get("/api/types-equipment", typeEquipmentController::getAllTypes); // Público
+        app.get("/api/types-equipment/{id}", typeEquipmentController::getTypeById); // Público
 
-        // --- Rutas de Estados de Equipo (Solo GET, ya que los valores son fijos) ---
-        app.get("/api/states-equipment", stateEquipmentController::getAllStates); // Obtener todos los estados (público)
-        app.get("/api/states-equipment/{id}", stateEquipmentController::getStateById); // Obtener estado por ID (público)
+        // --- Rutas de Estados de Equipo (Solo lectura) ---
+        app.get("/api/states-equipment", stateEquipmentController::getAllStates); // Público
+        app.get("/api/states-equipment/{id}", stateEquipmentController::getStateById); // Público
 
         // --- Rutas de Equipos ---
-        app.get("/api/equipment", equipmentController::getAllEquipment); // Obtener todos los equipos (público)
-        // NUEVO: Obtener equipos por proveedor
-        app.get("/api/equipment/provider/{id}", equipmentController::getEquipmentByProviderId);
+        app.get("/api/equipment", equipmentController::getAllEquipment); // Público
+        
+        // NUEVO: Endpoint de búsqueda con filtros
+        app.get("/api/equipment/search", equipmentController::searchEquipment); // Público
+        
+        app.get("/api/equipment/provider/{id}", equipmentController::getEquipmentByProviderId); // Público
 
-
-        app.post("/api/equipment", ctx -> { // Crear nuevo equipo
+        app.post("/api/equipment", ctx -> {
             AuthUtils.requireRole(ctx, "proveedor");
             equipmentController.createEquipment(ctx);
         });
 
-        app.get("/api/equipment/{id}", equipmentController::getEquipmentById); // Obtener equipo por ID (público)
+        app.get("/api/equipment/{id}", equipmentController::getEquipmentById); // Público
 
-        app.put("/api/equipment/{id}", ctx -> { // Actualizar equipo
+        app.put("/api/equipment/{id}", ctx -> {
             AuthUtils.requireRole(ctx, "proveedor");
             equipmentController.updateEquipment(ctx);
         });
 
-        app.delete("/api/equipment/{id}", ctx -> { // Eliminar equipo
+        app.delete("/api/equipment/{id}", ctx -> {
             AuthUtils.requireRole(ctx, "proveedor");
             equipmentController.deleteEquipment(ctx);
         });
 
         // --- Rutas de Reseñas ---
-        app.post("/api/reviews", ctx -> { // Crear nueva reseña
+        app.post("/api/reviews", ctx -> {
             AuthUtils.requireRole(ctx, "cliente");
             reviewController.createReview(ctx);
         });
 
-        app.delete("/api/reviews/{id}", ctx -> { // Eliminar reseña
+        app.delete("/api/reviews/{id}", ctx -> {
             AuthUtils.requireRole(ctx, "cliente");
             reviewController.deleteReview(ctx);
         });
@@ -145,12 +149,12 @@ public class ApiRoutes {
         });
 
         // --- Rutas de Favoritos ---
-        app.post("/api/favorites", ctx -> { // Añadir equipo a favoritos
+        app.post("/api/favorites", ctx -> {
             AuthUtils.requireRole(ctx, "cliente");
             favoriteController.addFavorite(ctx);
         });
 
-        app.delete("/api/favorites/{id}", ctx -> { // Eliminar favorito
+        app.delete("/api/favorites/{id}", ctx -> {
             AuthUtils.requireRole(ctx, "cliente");
             favoriteController.removeFavorite(ctx);
         });

@@ -2,17 +2,12 @@ package org.example.services;
 
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.NotFoundResponse;
-import io.javalin.http.InternalServerErrorResponse;
 import org.example.models.Brand;
 import org.example.models.Company;
 import org.example.models.CompanyBrand;
-import org.example.models.Provider;
-import org.example.models.User;
 import org.example.repositories.IBrandRepository;
-import org.example.repositories.ICompanyBrandRepository; // Nueva inyección
+import org.example.repositories.ICompanyBrandRepository;
 import org.example.repositories.ICompanyRepository;
-import org.example.repositories.IProviderRepository;
-import org.example.repositories.IUserRepository; // Puede necesitarse para obtener info del proveedor
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,23 +19,18 @@ public class CompanyService {
     private static final Logger log = LoggerFactory.getLogger(CompanyService.class);
     private final ICompanyRepository companyRepository;
     private final IBrandRepository brandRepository;
-    private final IProviderRepository providerRepository;
-    private final ICompanyBrandRepository companyBrandRepository; // Nueva inyección
-    private final IUserRepository userRepository; // Necesario para detalles del proveedor
+    private final ICompanyBrandRepository companyBrandRepository;
 
     public CompanyService(ICompanyRepository companyRepository, IBrandRepository brandRepository,
-                          IProviderRepository providerRepository, ICompanyBrandRepository companyBrandRepository,
-                          IUserRepository userRepository) { // Añadir a constructor
+                          ICompanyBrandRepository companyBrandRepository) {
         this.companyRepository = companyRepository;
         this.brandRepository = brandRepository;
-        this.providerRepository = providerRepository;
         this.companyBrandRepository = companyBrandRepository;
-        this.userRepository = userRepository;
     }
 
     public List<Company> getAllCompanies() {
         log.info("Obteniendo todas las compañías.");
-        return companyRepository.findAll(); // Asume findAll en ICompanyRepository
+        return companyRepository.findAll();
     }
 
     public Company getCompanyById(int id) {
@@ -48,6 +38,7 @@ public class CompanyService {
                 .orElseThrow(() -> new NotFoundResponse("Compañía no encontrada con ID: " + id));
     }
 
+    // MODIFICADO: Solo administradores pueden crear empresas
     public Company createCompany(Company company) {
         if (company.getName() == null || company.getName().trim().isEmpty()) {
             throw new BadRequestResponse("El nombre de la compañía es obligatorio.");
@@ -59,15 +50,10 @@ public class CompanyService {
         return companyRepository.save(company);
     }
 
-    public Company updateCompany(int id, Company updatedCompany, int authUserId) {
+    // MODIFICADO: Solo administradores pueden actualizar empresas
+    public Company updateCompany(int id, Company updatedCompany) {
         Company existingCompany = companyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundResponse("Compañía no encontrada con ID: " + id));
-
-        // Verificar que el usuario autenticado sea un proveedor de esta compañía
-        Optional<Provider> providerOpt = providerRepository.findByUserId(authUserId);
-        if (providerOpt.isEmpty() || providerOpt.get().getIdCompany() != id) {
-            throw new BadRequestResponse("No tienes permisos para actualizar esta compañía.");
-        }
 
         if (updatedCompany.getName() == null || updatedCompany.getName().trim().isEmpty()) {
             throw new BadRequestResponse("El nombre de la compañía es obligatorio.");
@@ -87,18 +73,11 @@ public class CompanyService {
         return companyRepository.update(existingCompany);
     }
 
-    public void deleteCompany(int id, int authUserId) {
-        Company existingCompany = companyRepository.findById(id)
+    // MODIFICADO: Solo administradores pueden eliminar empresas
+    public void deleteCompany(int id) {
+        companyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundResponse("Compañía no encontrada con ID: " + id));
 
-        // Verificar que el usuario autenticado sea un proveedor de esta compañía y que no haya otros proveedores
-        // O si quieres que solo un admin pueda eliminar compañías. Por ahora, un proveedor de la compañía.
-        Optional<Provider> providerOpt = providerRepository.findByUserId(authUserId);
-        if (providerOpt.isEmpty() || providerOpt.get().getIdCompany() != id) {
-            throw new BadRequestResponse("No tienes permisos para eliminar esta compañía.");
-        }
-        // Lógica adicional: ¿Qué pasa si la compañía tiene equipos publicados?
-        // La BD con ON DELETE RESTRICT en providers.id_company > company.id lo impedirá por defecto si hay proveedores.
         log.info("Eliminando compañía con ID: {}", id);
         companyRepository.delete(id);
     }
@@ -115,17 +94,12 @@ public class CompanyService {
                 .collect(Collectors.toList());
     }
 
-    public void addBrandToCompany(int companyId, int brandId, int authUserId) {
-        Company company = companyRepository.findById(companyId)
+    // MODIFICADO: Solo administradores pueden asociar marcas a empresas
+    public void addBrandToCompany(int companyId, int brandId) {
+        companyRepository.findById(companyId)
                 .orElseThrow(() -> new NotFoundResponse("Compañía no encontrada con ID: " + companyId));
-        Brand brand = brandRepository.findById(brandId)
+        brandRepository.findById(brandId)
                 .orElseThrow(() -> new NotFoundResponse("Marca no encontrada con ID: " + brandId));
-
-        // Verificar permisos: solo un proveedor de la compañía puede añadir marcas
-        Optional<Provider> providerOpt = providerRepository.findByUserId(authUserId);
-        if (providerOpt.isEmpty() || providerOpt.get().getIdCompany() != companyId) {
-            throw new BadRequestResponse("No tienes permisos para asociar marcas a esta compañía.");
-        }
 
         if (companyBrandRepository.findByCompanyAndBrand(companyId, brandId).isPresent()) {
             throw new BadRequestResponse("La marca ya está asociada a esta compañía.");
@@ -135,17 +109,12 @@ public class CompanyService {
         companyBrandRepository.save(companyId, brandId);
     }
 
-    public void removeBrandFromCompany(int companyId, int brandId, int authUserId) {
-        Company company = companyRepository.findById(companyId)
+    // MODIFICADO: Solo administradores pueden desasociar marcas de empresas
+    public void removeBrandFromCompany(int companyId, int brandId) {
+        companyRepository.findById(companyId)
                 .orElseThrow(() -> new NotFoundResponse("Compañía no encontrada con ID: " + companyId));
-        Brand brand = brandRepository.findById(brandId)
+        brandRepository.findById(brandId)
                 .orElseThrow(() -> new NotFoundResponse("Marca no encontrada con ID: " + brandId));
-
-        // Verificar permisos
-        Optional<Provider> providerOpt = providerRepository.findByUserId(authUserId);
-        if (providerOpt.isEmpty() || providerOpt.get().getIdCompany() != companyId) {
-            throw new BadRequestResponse("No tienes permisos para desasociar marcas de esta compañía.");
-        }
 
         Optional<CompanyBrand> association = companyBrandRepository.findByCompanyAndBrand(companyId, brandId);
         if (association.isEmpty()) {

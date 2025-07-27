@@ -29,6 +29,7 @@ public class BrandService {
                 .orElseThrow(() -> new NotFoundResponse("Marca no encontrada con ID: " + id));
     }
 
+    // MODIFICADO: Solo administradores pueden crear marcas
     public Brand createBrand(BrandDto brandDto) {
         if (brandDto.getNameBrand() == null || brandDto.getNameBrand().trim().isEmpty()) {
             throw new BadRequestResponse("El nombre de la marca es obligatorio.");
@@ -42,6 +43,7 @@ public class BrandService {
         return brandRepository.save(newBrand);
     }
 
+    // MODIFICADO: Solo administradores pueden actualizar marcas
     public Brand updateBrand(int id, BrandDto brandDto) {
         Brand existingBrand = brandRepository.findById(id)
                 .orElseThrow(() -> new NotFoundResponse("Marca no encontrada con ID: " + id));
@@ -49,7 +51,6 @@ public class BrandService {
         if (brandDto.getNameBrand() == null || brandDto.getNameBrand().trim().isEmpty()) {
             throw new BadRequestResponse("El nombre de la marca es obligatorio.");
         }
-        // Check if the new name clashes with another existing brand (excluding itself)
         Optional<Brand> brandWithName = brandRepository.findByName(brandDto.getNameBrand());
         if (brandWithName.isPresent() && brandWithName.get().getId() != id) {
             throw new BadRequestResponse("Ya existe otra marca con el nombre: " + brandDto.getNameBrand());
@@ -60,12 +61,11 @@ public class BrandService {
         return brandRepository.update(existingBrand);
     }
 
+    // MODIFICADO: Solo administradores pueden eliminar marcas
     public void deleteBrand(int id) {
         if (brandRepository.findById(id).isEmpty()) {
             throw new NotFoundResponse("Marca no encontrada con ID: " + id);
         }
-        // TODO: Considerar la lógica de negocio para eliminar marcas (ej. ¿qué pasa con los equipos que la usan?)
-        // Por ahora, el FK on DELETE RESTRICT en la BD lo manejará.
         log.info("Eliminando marca con ID: {}", id);
         brandRepository.delete(id);
     }

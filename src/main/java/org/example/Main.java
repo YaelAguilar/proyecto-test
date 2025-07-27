@@ -10,7 +10,7 @@ import org.example.controllers.*;
 import org.example.repositories.*;
 import org.example.routes.ApiRoutes;
 import org.example.services.*;
-import org.example.utils.JwtManager; // <-- CORREGIDO: Importación de JwtManager
+import org.example.utils.JwtManager;
 import org.example.models.dtos.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +48,12 @@ public class Main {
         // --- 5. Inicializar Servicios (Capa de Lógica de Negocio) ---
         AuthService authService = new AuthService(userRepository, roleRepository, clientRepository, providerRepository, companyRepository, jwtManager);
         UserService userService = new UserService(userRepository, roleRepository, providerRepository);
-        CompanyService companyService = new CompanyService(companyRepository, brandRepository, providerRepository, companyBrandRepository, userRepository);
+        CompanyService companyService = new CompanyService(companyRepository, brandRepository, companyBrandRepository);
         BrandService brandService = new BrandService(brandRepository);
         TypeEquipmentService typeEquipmentService = new TypeEquipmentService(typeEquipmentRepository);
         StateEquipmentService stateEquipmentService = new StateEquipmentService(stateEquipmentRepository);
-        EquipmentService equipmentService = new EquipmentService(equipmentRepository, providerRepository, typeEquipmentRepository, stateEquipmentRepository, brandRepository, userRepository, companyRepository);
+        // MODIFICADO: Añadido companyBrandRepository al constructor de EquipmentService
+        EquipmentService equipmentService = new EquipmentService(equipmentRepository, providerRepository, typeEquipmentRepository, stateEquipmentRepository, brandRepository, userRepository, companyRepository, companyBrandRepository);
         ReviewService reviewService = new ReviewService(reviewRepository, equipmentRepository, userRepository, starRepository);
         FavoriteService favoriteService = new FavoriteService(favoriteRepository, equipmentRepository, userRepository);
 
@@ -111,6 +112,6 @@ public class Main {
             }
         }));
 
-        log.info("Servidor Javalin iniciado exitosamente en el puerto 7000");
+        log.info("Servidor Javalin iniciado exitosamente en el puerto {}", port);
     }
 }

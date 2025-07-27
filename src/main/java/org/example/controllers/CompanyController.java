@@ -4,7 +4,6 @@ import io.javalin.http.Context;
 import org.example.models.Brand;
 import org.example.models.Company;
 import org.example.services.CompanyService;
-import org.example.utils.AuthUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,27 +30,28 @@ public class CompanyController {
         ctx.json(company);
     }
 
+    // MODIFICADO: Solo administradores pueden crear empresas
     public void createCompany(Context ctx) {
-        Company company = ctx.bodyAsClass(Company.class); // Usa el modelo directo para crear, o un CompanyCreateDto
+        Company company = ctx.bodyAsClass(Company.class);
         log.info("Solicitud para crear nueva compañía: {}", company.getName());
         Company newCompany = companyService.createCompany(company);
         ctx.status(201).json(newCompany);
     }
 
+    // MODIFICADO: Solo administradores pueden actualizar empresas
     public void updateCompany(Context ctx) {
         int id = ctx.pathParamAsClass("id", Integer.class).get();
         Company updatedCompany = ctx.bodyAsClass(Company.class);
-        int authUserId = AuthUtils.getAuthenticatedUserId(ctx); // Obtener ID del usuario autenticado
         log.info("Solicitud para actualizar compañía ID {}: {}", id, updatedCompany.getName());
-        Company result = companyService.updateCompany(id, updatedCompany, authUserId);
+        Company result = companyService.updateCompany(id, updatedCompany);
         ctx.json(result);
     }
 
+    // MODIFICADO: Solo administradores pueden eliminar empresas
     public void deleteCompany(Context ctx) {
         int id = ctx.pathParamAsClass("id", Integer.class).get();
-        int authUserId = AuthUtils.getAuthenticatedUserId(ctx);
         log.info("Solicitud para eliminar compañía con ID: {}", id);
-        companyService.deleteCompany(id, authUserId);
+        companyService.deleteCompany(id);
         ctx.status(204); // No Content
     }
 
@@ -63,21 +63,21 @@ public class CompanyController {
         ctx.json(brands);
     }
 
+    // MODIFICADO: Solo administradores pueden asociar marcas
     public void addBrandToCompany(Context ctx) {
         int companyId = ctx.pathParamAsClass("companyId", Integer.class).get();
         int brandId = ctx.pathParamAsClass("brandId", Integer.class).get();
-        int authUserId = AuthUtils.getAuthenticatedUserId(ctx);
         log.info("Solicitud para asociar marca {} a compañía {}", brandId, companyId);
-        companyService.addBrandToCompany(companyId, brandId, authUserId);
+        companyService.addBrandToCompany(companyId, brandId);
         ctx.status(200).result("Marca asociada a la compañía exitosamente.");
     }
 
+    // MODIFICADO: Solo administradores pueden desasociar marcas
     public void removeBrandFromCompany(Context ctx) {
         int companyId = ctx.pathParamAsClass("companyId", Integer.class).get();
         int brandId = ctx.pathParamAsClass("brandId", Integer.class).get();
-        int authUserId = AuthUtils.getAuthenticatedUserId(ctx);
         log.info("Solicitud para desasociar marca {} de compañía {}", brandId, companyId);
-        companyService.removeBrandFromCompany(companyId, brandId, authUserId);
+        companyService.removeBrandFromCompany(companyId, brandId);
         ctx.status(204); // No Content
     }
 }

@@ -2,7 +2,6 @@ package org.example.services;
 
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.InternalServerErrorResponse;
-import io.javalin.http.NotFoundResponse;
 import io.javalin.http.UnauthorizedResponse;
 import org.example.models.Company;
 import org.example.models.Provider;
@@ -90,7 +89,7 @@ public class AuthService {
         }
 
         // --- 5. Manejar el tipo de usuario (Cliente/Proveedor) ---
-        Integer companyId = null; // Declaración de variable local
+        Integer companyId = null;
         if (registerDto.getUserType().equalsIgnoreCase("cliente")) {
             try {
                 clientRepository.save(savedUser.getId());
@@ -99,27 +98,19 @@ public class AuthService {
                 throw new InternalServerErrorResponse("Error al finalizar el registro como cliente.");
             }
         } else if (registerDto.getUserType().equalsIgnoreCase("proveedor")) {
-            if (registerDto.getCompanyName() != null && !registerDto.getCompanyName().isEmpty()) {
-                Optional<Company> existingCompany = companyRepository.findByName(registerDto.getCompanyName());
-                if (existingCompany.isPresent()) {
-                    companyId = existingCompany.get().getId();
-                } else {
-                    Company newCompany = new Company();
-                    newCompany.setName(registerDto.getCompanyName());
-                    newCompany.setEmail(registerDto.getCompanyEmail());
-                    newCompany.setPhone(registerDto.getCompanyPhone());
-                    newCompany.setAddress(registerDto.getCompanyAddress());
-                    newCompany.setWebSite(registerDto.getCompanyWebSite());
-                    try {
-                        Company savedCompany = companyRepository.save(newCompany);
-                        companyId = savedCompany.getId();
-                    } catch (RuntimeException e) {
-                        log.error("Fallo al guardar la compañía para el nuevo proveedor {}: {}", savedUser.getId(), e.getMessage(), e);
-                        throw new InternalServerErrorResponse("Error al registrar la compañía del proveedor.");
-                    }
-                }
+            // MODIFICADO: Los proveedores ahora deben seleccionar una empresa existente
+            if (registerDto.getCompanyId() == null || registerDto.getCompanyId() <= 0) {
+                throw new BadRequestResponse("Los proveedores deben seleccionar una empresa existente.");
             }
-
+            
+            // Verificar que la empresa existe
+            Optional<Company> companyOpt = companyRepository.findById(registerDto.getCompanyId());
+            if (companyOpt.isEmpty()) {
+                throw new BadRequestResponse("La empresa seleccionada no existe.");
+            }
+            
+            companyId = registerDto.getCompanyId();
+            
             try {
                 providerRepository.save(savedUser.getId(), companyId);
             } catch (RuntimeException e) {
@@ -163,7 +154,6 @@ public class AuthService {
 
         // --- 5. Obtener companyId si es proveedor ---
         Integer companyId = null;
-        // CORREGIDO: Usar if (isPresent()) en lugar de ifPresent(lambda) para permitir la modificación de companyId
         Optional<Provider> providerOpt = providerRepository.findByUserId(user.getId());
         if (providerOpt.isPresent()) {
             Provider provider = providerOpt.get();

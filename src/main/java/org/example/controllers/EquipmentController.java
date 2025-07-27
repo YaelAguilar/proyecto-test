@@ -25,7 +25,21 @@ public class EquipmentController {
         ctx.json(equipmentList);
     }
 
-    // NUEVO: Método para obtener equipos por ID de proveedor
+    // NUEVO: Método para buscar equipos con filtros
+    public void searchEquipment(Context ctx) {
+        String name = ctx.queryParam("name");
+        Integer typeId = ctx.queryParamAsClass("typeId", Integer.class).getOrDefault(null);
+        Integer stateId = ctx.queryParamAsClass("stateId", Integer.class).getOrDefault(null);
+        Integer companyId = ctx.queryParamAsClass("companyId", Integer.class).getOrDefault(null);
+        Integer brandId = ctx.queryParamAsClass("brandId", Integer.class).getOrDefault(null);
+        
+        log.info("Búsqueda de equipos con filtros - name: {}, typeId: {}, stateId: {}, companyId: {}, brandId: {}", 
+                 name, typeId, stateId, companyId, brandId);
+        
+        List<EquipmentResponseDto> equipmentList = equipmentService.searchEquipment(name, typeId, stateId, companyId, brandId);
+        ctx.json(equipmentList);
+    }
+
     public void getEquipmentByProviderId(Context ctx) {
         int providerId = ctx.pathParamAsClass("id", Integer.class).get();
         log.info("Solicitud para obtener equipos del proveedor con ID: {}", providerId);

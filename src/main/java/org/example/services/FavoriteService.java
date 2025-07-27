@@ -3,9 +3,7 @@ package org.example.services;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.NotFoundResponse;
-import org.example.models.Equipment;
 import org.example.models.Favorite;
-import org.example.models.User;
 import org.example.models.dtos.FavoriteRequestDto;
 import org.example.repositories.IEquipmentRepository;
 import org.example.repositories.IFavoriteRepository;
@@ -14,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
 
 public class FavoriteService {
     private static final Logger log = LoggerFactory.getLogger(FavoriteService.class);
