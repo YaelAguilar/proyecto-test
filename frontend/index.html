@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EquipLink Marketplace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>EquipLink</h1>
+        <nav>
+            <button id="nav-catalog" class="nav-button active">Catálogo</button>
+            <button id="nav-auth" class="nav-button">Iniciar Sesión / Registrar</button>
+            <button id="nav-provider-dashboard" class="nav-button hidden">Panel Proveedor</button>
+            <button id="nav-client-dashboard" class="nav-button hidden">Panel Cliente</button>
+            <button id="nav-logout" class="nav-button hidden">Cerrar Sesión</button>
+        </nav>
+    </header>
+
+    <main>
+        <div id="loading-spinner" class="spinner hidden"></div>
+        <div id="error-message" class="error-container hidden"></div>
+
+        <!-- Catálogo de Equipos -->
+        <section id="catalog-page" class="page">
+            <h2>Catálogo de Equipos</h2>
+            <div id="equipment-list" class="grid-container">
+                <!-- Los equipos se cargarán aquí -->
+            </div>
+        </section>
+
+        <!-- Detalle de Equipo -->
+        <section id="equipment-detail-page" class="page hidden">
+            <button id="back-to-catalog" class="btn">← Volver al Catálogo</button>
+            <div id="equipment-detail-content">
+                <!-- Detalles del equipo se cargarán aquí -->
+            </div>
+            <div id="reviews-section">
+                <h3>Reseñas</h3>
+                <div id="reviews-list"></div>
+                <h4>Dejar una Reseña</h4>
+                <div id="review-form-container" class="hidden">
+                    <input type="number" id="review-star-value" min="1" max="5" placeholder="Estrellas (1-5)" required>
+                    <textarea id="review-body" placeholder="Escribe tu reseña aquí..."></textarea>
+                    <button id="submit-review-btn" class="btn">Enviar Reseña</button>
+                </div>
+                <p id="review-login-prompt" class="hidden">Debes iniciar sesión como cliente para dejar una reseña.</p>
+            </div>
+        </section>
+
+        <!-- Página de Login / Registro -->
+        <section id="auth-page" class="page hidden">
+            <h2>Iniciar Sesión / Registrar</h2>
+            <div class="auth-forms">
+                <div class="auth-form">
+                    <h3>Iniciar Sesión</h3>
+                    <form id="login-form">
+                        <input type="email" id="login-email" placeholder="Email" required>
+                        <input type="password" id="login-password" placeholder="Contraseña" required>
+                        <button type="submit" class="btn">Iniciar Sesión</button>
+                    </form>
+                </div>
+                <div class="auth-form">
+                    <h3>Registrar</h3>
+                    <form id="register-form">
+                        <input type="text" id="register-fullname" placeholder="Nombre Completo" required>
+                        <input type="email" id="register-email" placeholder="Email" required>
+                        <input type="password" id="register-password" placeholder="Contraseña" required>
+                        <select id="register-usertype" required>
+                            <option value="">Selecciona tipo de usuario</option>
+                            <option value="cliente">Cliente</option>
+                            <option value="proveedor">Proveedor</option>
+                        </select>
+                        <!-- Campos para proveedor (condicionales) -->
+                        <div id="provider-fields" class="hidden">
+                            <h4>Datos de la Compañía (Opcional)</h4>
+                            <input type="text" id="company-name" placeholder="Nombre de la Compañía">
+                            <input type="email" id="company-email" placeholder="Email de la Compañía">
+                            <input type="text" id="company-phone" placeholder="Teléfono de la Compañía">
+                            <input type="text" id="company-address" placeholder="Dirección de la Compañía">
+                            <input type="text" id="company-website" placeholder="Sitio Web de la Compañía">
+                        </div>
+                        <button type="submit" class="btn">Registrar</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel de Proveedor -->
+        <section id="provider-dashboard-page" class="page hidden">
+            <h2>Panel de Proveedor</h2>
+            <div class="dashboard-tabs">
+                <button class="tab-button active" data-tab="provider-equipment">Mis Equipos</button>
+                <button class="tab-button" data-tab="provider-company">Mi Compañía</button>
+            </div>
+
+            <div id="provider-equipment-tab" class="tab-content">
+                <h3>Mis Equipos</h3>
+                <button id="add-equipment-btn" class="btn">Añadir Nuevo Equipo</button>
+                <div id="my-equipment-list" class="grid-container"></div>
+            </div>
+
+            <div id="provider-company-tab" class="tab-content hidden">
+                <h3>Información de mi Compañía</h3>
+                <div id="company-details-view">
+                    <!-- Detalles de la compañía se mostrarán aquí -->
+                    <p><strong>Nombre:</strong> <span id="view-company-name"></span></p>
+                    <p><strong>Email:</strong> <span id="view-company-email"></span></p>
+                    <p><strong>Teléfono:</strong> <span id="view-company-phone"></span></p>
+                    <p><strong>Dirección:</strong> <span id="view-company-address"></span></p>
+                    <p><strong>Web:</strong> <span id="view-company-website"></span></p>
+                    <button id="edit-company-btn" class="btn">Editar Compañía</button>
+                    <h4>Marcas asociadas</h4>
+                    <div id="company-brands-list"></div>
+                    <button id="add-company-brand-btn" class="btn">Asociar Marca</button>
+                </div>
+                <form id="edit-company-form" class="hidden">
+                    <input type="text" id="edit-company-name" placeholder="Nombre de la Compañía" required>
+                    <input type="email" id="edit-company-email" placeholder="Email de la Compañía">
+                    <input type="text" id="edit-company-phone" placeholder="Teléfono de la Compañía">
+                    <input type="text" id="edit-company-address" placeholder="Dirección de la Compañía">
+                    <input type="text" id="edit-company-website" placeholder="Sitio Web de la Compañía">
+                    <button type="submit" class="btn">Guardar Cambios</button>
+                    <button type="button" class="btn cancel-btn" id="cancel-edit-company-btn">Cancelar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Panel de Cliente -->
+        <section id="client-dashboard-page" class="page hidden">
+            <h2>Panel de Cliente</h2>
+            <div class="dashboard-tabs">
+                <button class="tab-button active" data-tab="client-favorites">Mis Favoritos</button>
+                <button class="tab-button" data-tab="client-reviews">Mis Reseñas</button>
+            </div>
+            <div id="client-favorites-tab" class="tab-content">
+                <h3>Mis Equipos Favoritos</h3>
+                <div id="my-favorites-list" class="grid-container"></div>
+            </div>
+            <div id="client-reviews-tab" class="tab-content hidden">
+                <h3>Mis Reseñas</h3>
+                <div id="my-reviews-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals (pop-ups) para añadir/editar equipo, marca, tipo, estado, asociar marca -->
+
+    <!-- Modal para Añadir/Editar Equipo -->
+    <div id="equipment-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h3 id="equipment-modal-title">Añadir Equipo</h3>
+            <form id="equipment-form">
+                <input type="hidden" id="equipment-id">
+                <input type="text" id="equipment-name" placeholder="Nombre del Equipo" required>
+                <textarea id="equipment-description" placeholder="Descripción"></textarea>
+                <input type="number" id="equipment-price" step="0.01" placeholder="Precio" required>
+                <!-- CORREGIDO: input type="url" para la URL de la imagen del equipo -->
+                <input type="url" id="equipment-url-image" placeholder="URL de la Imagen del Equipo"> 
+                <select id="equipment-type-id" required>
+                    <option value="">Selecciona Tipo de Equipo</option>
+                </select>
+                <select id="equipment-state-id" required>
+                    <option value="">Selecciona Estado del Equipo</option>
+                </select>
+                <select id="equipment-brand-id" required>
+                    <option value="">Selecciona Marca</option>
+                </select>
+                <button type="submit" class="btn">Guardar Equipo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Añadir/Editar Marca -->
+    <div id="brand-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h3 id="brand-modal-title">Añadir Marca</h3>
+            <form id="brand-form">
+                <input type="hidden" id="brand-id">
+                <input type="text" id="brand-name" placeholder="Nombre de la Marca" required>
+                <button type="submit" class="btn">Guardar Marca</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modales para Tipo y Estado (ahora solo de lectura, pero se mantienen porque las usa equipment-form) -->
+    <div id="type-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h3 id="type-modal-title">Detalles de Tipo de Equipo</h3>
+            <form id="type-form">
+                <input type="hidden" id="type-id">
+                <input type="text" id="type-name" placeholder="Nombre del Tipo" disabled>
+            </form>
+        </div>
+    </div>
+
+    <div id="state-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h3 id="state-modal-title">Detalles de Estado de Equipo</h3>
+            <form id="state-form">
+                <input type="hidden" id="state-id">
+                <input type="text" id="state-name" placeholder="Nombre del Estado" disabled>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Asociar Marca a Compañía -->
+    <div id="company-brand-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h3>Asociar Marca a Compañía</h3>
+            <form id="company-brand-form">
+                <select id="associate-brand-id" required>
+                    <option value="">Selecciona Marca</option>
+                    <!-- Opciones de marcas se cargarán aquí -->
+                </select>
+                <button type="submit" class="btn">Asociar Marca</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
