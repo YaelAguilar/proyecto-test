@@ -7,9 +7,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>EquipLink</h1>
-        <nav>
+    <header class="main-header">
+        <div class="logo-container">
+            <div class="logo-icon">🩺</div>
+            <h1 class="site-title">EquipLink</h1>
+        </div>
+        <nav class="main-nav">
             <button id="nav-catalog" class="nav-button active">Catálogo</button>
             <button id="nav-auth" class="nav-button">Iniciar Sesión / Registrar</button>
             <button id="nav-admin-dashboard" class="nav-button hidden">Panel Admin</button>
@@ -20,14 +23,18 @@
     </header>
 
     <main>
+        <div class="presentation-section">
+            <div class="presentation-content">
+                <h2>Soluciones en Equipos Médicos</h2>
+                <p>Encuentra, compara y gestiona equipos médicos de manera profesional y segura.</p>
+            </div>
+        </div>
         <div id="loading-spinner" class="spinner hidden"></div>
         <div id="error-message" class="error-container hidden"></div>
 
         <!-- Catálogo de Equipos -->
         <section id="catalog-page" class="page">
             <h2>Catálogo de Equipos</h2>
-            
-            <!-- NUEVO: Filtros de búsqueda -->
             <div id="search-filters" class="filters-container">
                 <h3>Filtros de búsqueda</h3>
                 <div class="filter-row">
@@ -48,9 +55,16 @@
                     <button id="clear-filters-btn" class="btn">Limpiar</button>
                 </div>
             </div>
-            
-            <div id="equipment-list" class="grid-container">
-                <!-- Los equipos se cargarán aquí -->
+            <div id="equipment-list" class="equipment-grid">
+                <!-- Ejemplo de card de equipo médico -->
+                <div class="equipment-card">
+                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd2e?auto=format&fit=crop&w=400&q=80" alt="Equipo Médico" class="equipment-card-img">
+                    <div class="equipment-card-title">Monitor de Signos Vitales</div>
+                    <div class="equipment-card-details">Marca: Philips<br>Tipo: Monitor<br>Estado: Nuevo</div>
+                    <div class="equipment-card-price">$12,500 MXN</div>
+                    <button class="btn">Ver Detalles</button>
+                </div>
+                <!-- Repite este bloque dinámicamente con JS para cada equipo -->
             </div>
         </section>
 
@@ -65,7 +79,14 @@
                 <div id="reviews-list"></div>
                 <h4>Dejar una Reseña</h4>
                 <div id="review-form-container" class="hidden">
-                    <input type="number" id="review-star-value" min="1" max="5" placeholder="Estrellas (1-5)" required>
+                    <div class="star-rating-input">
+                        <span class="star" data-value="1">&#9733;</span>
+                        <span class="star" data-value="2">&#9733;</span>
+                        <span class="star" data-value="3">&#9733;</span>
+                        <span class="star" data-value="4">&#9733;</span>
+                        <span class="star" data-value="5">&#9733;</span>
+                        <input type="number" id="review-star-value" min="1" max="5" placeholder="Estrellas (1-5)" required style="display:none;">
+                    </div>
                     <textarea id="review-body" placeholder="Escribe tu reseña aquí..."></textarea>
                     <button id="submit-review-btn" class="btn">Enviar Reseña</button>
                 </div>
@@ -176,6 +197,28 @@
         </section>
     </main>
 
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>EquipLink</h3>
+                <p>Marketplace de equipos médicos. Soluciones para hospitales, clínicas y profesionales de la salud.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contacto</h4>
+                <p>Email: contacto@equiplink.com</p>
+                <p>Teléfono: +52 55 1234 5678</p>
+            </div>
+            <div class="footer-section">
+                <h4>Enlaces</h4>
+                <ul>
+                    <li><a href="#catalog-page">Catálogo</a></li>
+                    <li><a href="#auth-page">Acceso</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">&copy; 2025 EquipLink. Todos los derechos reservados.</div>
+    </footer>
+
     <!-- Modals (pop-ups) -->
 
     <!-- Modal para Añadir/Editar Empresa (NUEVO) -->
@@ -253,6 +296,86 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
+<script>
+// Sistema de estrellas visual para reseñas
+document.addEventListener('DOMContentLoaded', function() {
+  const starInputs = document.querySelectorAll('.star-rating-input');
+  starInputs.forEach(function(starInput) {
+    const stars = starInput.querySelectorAll('.star');
+    const hiddenInput = starInput.querySelector('input[type="number"]');
+    stars.forEach(function(star, idx) {
+      star.addEventListener('click', function() {
+        stars.forEach((s, i) => {
+          if (i <= idx) {
+            s.classList.add('selected');
+          } else {
+            s.classList.remove('selected');
+          }
+        });
+        hiddenInput.value = idx + 1;
+      });
+      star.addEventListener('mouseover', function() {
+        stars.forEach((s, i) => {
+          if (i <= idx) {
+            s.classList.add('hovered');
+          } else {
+            s.classList.remove('hovered');
+          }
+        });
+      });
+      star.addEventListener('mouseout', function() {
+        stars.forEach((s, i) => {
+          s.classList.remove('hovered');
+        });
+      });
+    });
+  });
+
+  // Ejemplo de render dinámico de cards (puedes reemplazar por tu lógica real)
+  const equipos = [
+    {
+      nombre: 'Monitor de Signos Vitales',
+      marca: 'Philips',
+      tipo: 'Monitor',
+      estado: 'Nuevo',
+      precio: '$12,500 MXN',
+      imagen: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd2e?auto=format&fit=crop&w=400&q=80'
+    },
+    {
+      nombre: 'Electrocardiógrafo',
+      marca: 'GE Healthcare',
+      tipo: 'Diagnóstico',
+      estado: 'Usado',
+      precio: '$8,900 MXN',
+      imagen: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80'
+    },
+    {
+      nombre: 'Bomba de Infusión',
+      marca: 'Baxter',
+      tipo: 'Terapia',
+      estado: 'Nuevo',
+      precio: '$5,200 MXN',
+      imagen: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80'
+    }
+  ];
+  const equipmentList = document.getElementById('equipment-list');
+  if (equipmentList) {
+    equipmentList.innerHTML = '';
+    equipos.forEach(equipo => {
+      const card = document.createElement('div');
+      card.className = 'equipment-card';
+      card.innerHTML = `
+        <img src="${equipo.imagen}" alt="${equipo.nombre}" class="equipment-card-img">
+        <div class="equipment-card-title">${equipo.nombre}</div>
+        <div class="equipment-card-details">Marca: ${equipo.marca}<br>Tipo: ${equipo.tipo}<br>Estado: ${equipo.estado}</div>
+        <div class="equipment-card-price">${equipo.precio}</div>
+        <button class="btn">Ver Detalles</button>
+      `;
+      equipmentList.appendChild(card);
+    });
+  }
+});
+</script>
 </body>
 </html>

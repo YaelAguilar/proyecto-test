@@ -18,87 +18,231 @@ header {
     flex-wrap: wrap;
 }
 
-header h1 {
+/* ...eliminar reglas huérfanas y duplicadas... */
+
+/* =====================
+   Estilos Modernos EquipLink
+   ===================== */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
-    font-size: 1.8rem;
+    padding: 0;
+    background-color: #f8fbfd;
+    color: #222;
 }
 
-nav {
+/* Header */
+.main-header {
+    background: linear-gradient(90deg, #007bff 0%, #00c6a2 100%);
+    color: #fff;
+    padding: 1.5rem 2rem 1rem 2rem;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.logo-icon {
+    font-size: 2.5rem;
+    background: #fff;
+    color: #00c6a2;
+    border-radius: 50%;
+    padding: 0.3rem 0.6rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.site-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+}
+/* Card compacta y moderna para equipos médicos */
+.equipment-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+    padding: 1rem 1rem 1.2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+    min-width: 260px;
+    max-width: 320px;
+    margin: 0 auto;
+}
+.equipment-card:hover {
+    box-shadow: 0 6px 24px rgba(0,123,255,0.15);
+    transform: translateY(-4px) scale(1.03);
+}
+.equipment-card-img {
+    width: 100%;
+    max-width: 220px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+.equipment-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #007bff;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+.equipment-card-details {
+    font-size: 0.98rem;
+    color: #222;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+.equipment-card-price {
+    font-size: 1.08rem;
+    color: #00c6a2;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    text-align: center;
+}
+.equipment-card .btn {
+    width: 100%;
+    margin-top: 0.2rem;
 }
 
-.nav-button {
-    background-color: #555;
-    color: white;
+/* Sistema de estrellas visual para reseñas */
+.star-rating-input {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0.7rem;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+.star-rating-input .star {
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.star-rating-input .star.selected,
+.star-rating-input .star:hover,
+.star-rating-input .star:hover ~ .star {
+    color: #FFD700;
+}
+.presentation-content h2 {
+    font-size: 2.2rem;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+.presentation-content p {
+    font-size: 1.2rem;
+    color: #222;
+    margin-bottom: 0;
+}
+
+/* Filtros */
+.filters-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Botones */
+.btn {
+    background-color: #00c6a2;
+    color: #fff;
     border: none;
     padding: 0.7rem 1.2rem;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background 0.2s;
+    margin-top: 10px;
 }
-
-.nav-button:hover:not(.active) {
-    background-color: #777;
-}
-
-.nav-button.active {
+.btn:hover {
     background-color: #007bff;
-    font-weight: bold;
 }
 
-/* Main Content Area */
-main {
-    padding: 20px;
+/* Footer */
+.main-footer {
+    background: linear-gradient(90deg, #007bff 0%, #00c6a2 100%);
+    color: #fff;
+    padding: 2rem 0 1rem 0;
+    margin-top: 2rem;
+}
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 2rem;
     max-width: 1200px;
-    margin: 20px auto;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto 1rem auto;
+}
+.footer-section {
+    flex: 1 1 220px;
+    min-width: 220px;
+}
+.footer-section h3, .footer-section h4 {
+    margin-top: 0;
+    color: #fff;
+}
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+.footer-section a {
+    color: #e3f6ff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.footer-section a:hover {
+    color: #fff;
+}
+.footer-bottom {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #e3f6ff;
+    margin-top: 1rem;
 }
 
-.page {
-    padding: 1rem;
-}
-
-/* Utility Classes */
+/* Utilidades y correcciones */
 .hidden {
     display: none !important;
 }
-
-.btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 0.7rem 1.2rem;
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #007bff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-left: -15px;
+    margin-top: -15px;
+    z-index: 1001;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.error-container {
+    background-color: #ffe0e0;
+    color: #d8000c;
+    border: 1px solid #d8000c;
+    padding: 10px;
+    margin-bottom: 20px;
     border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease;
-    margin-top: 10px;
-}
-
-.btn:hover {
-    background-color: #0056b3;
-}
-
-.btn.delete-btn {
-    background-color: #dc3545;
-}
-
-.btn.delete-btn:hover {
-    background-color: #c82333;
-}
-
-.btn.edit-btn {
-    background-color: #ffc107;
-    color: #333;
-}
-
-.btn.edit-btn:hover {
-    background-color: #e0a800;
+    text-align: center;
 }
 
 .btn.cancel-btn {
@@ -131,14 +275,6 @@ main {
     align-items: center;
 }
 
-.filter-row input[type="text"],
-.filter-row select {
-    flex: 1;
-    min-width: 150px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
 
 .filter-row .btn {
     margin-top: 0;
@@ -208,12 +344,12 @@ textarea {
     padding: 15px;
     text-align: center;
     transition: transform 0.2s ease;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
+.equipment-grid {
 .card:hover {
     transform: translateY(-5px);
 }
@@ -250,12 +386,12 @@ textarea {
     padding: 0.5rem 0.8rem;
     font-size: 0.8rem;
 }
+}
 
 /* Equipment Detail Page Specifics */
 #equipment-detail-content {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
     margin-top: 20px;
     align-items: flex-start;
 }
@@ -268,10 +404,7 @@ textarea {
     max-height: 400px;
 }
 
-.detail-info {
-    flex: 1;
-    min-width: 300px;
-}
+/* ...eliminar reglas huérfanas y duplicadas... */
 
 .detail-info h2 {
     font-size: 2rem;
@@ -296,7 +429,6 @@ textarea {
 #reviews-list .review-item {
     background-color: #f9f9f9;
     border: 1px solid #eee;
-    border-radius: 5px;
     padding: 15px;
     margin-bottom: 10px;
     display: flex;
@@ -308,21 +440,7 @@ textarea {
     margin: 0;
 }
 
-#reviews-list .review-item .review-meta {
-    font-size: 0.85rem;
-    color: #777;
-    margin-bottom: 5px;
-}
-#reviews-list .review-item .review-body {
-    font-size: 0.95rem;
-    color: #444;
-}
-#reviews-list .review-item .btn {
-    margin-left: 10px;
-    padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
-    white-space: nowrap;
-}
+/* ...eliminar reglas huérfanas y duplicadas... */
 
 #review-form-container {
     display: flex;
@@ -509,4 +627,5 @@ textarea {
     margin: 0;
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
+/* Fin de bloque corregido */
 }
