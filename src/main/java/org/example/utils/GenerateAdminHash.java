@@ -8,7 +8,7 @@ public class GenerateAdminHash {
         int WORKLOAD_FACTOR = 12;
         
         // La contraseña que quieres hashear
-        String password = "admin123";
+        String password = "123456789";   
         
         // Generar el hash
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(WORKLOAD_FACTOR));
